@@ -4,10 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Career-Compass | Biosciences Diagnostic & Multi-Track IDP Engine</title>
-  <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- jsPDF Library (Native PDF Engine) -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
 <body class="bg-slate-50 text-slate-800 font-sans min-h-screen flex flex-col">
 
@@ -38,7 +35,7 @@
             Diagnostic Assessment Outcome
           </span>
           <h2 class="text-2xl font-black text-white" id="assessmentHeadline">Take the 20-Question Diagnostic Test</h2>
-          <p class="text-xs md:text-slate-300" id="assessmentSummary">
+          <p class="text-xs md:text-sm text-slate-300" id="assessmentSummary">
             Complete the 20-question diagnostic test to calculate your affinity scores across scientific research and industrial operations.
           </p>
         </div>
@@ -156,15 +153,15 @@
       <!-- Aggregated Dynamic Skill Checkboxes -->
       <div class="space-y-4" id="skillsChecklistContainer"></div>
 
-      <!-- Finalize & Download PDF Button -->
+      <!-- Save & Print/Download PDF Button -->
       <div class="pt-2">
-        <button onclick="generateProgrammaticPDF()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-xl text-sm transition shadow-md flex items-center gap-2">
-          <span>📥</span> Save & Download My IDP Dossier (PDF)
+        <button onclick="printOrSaveAsPDF()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-xl text-sm transition shadow-md flex items-center gap-2">
+          <span>🖨️</span> Save & Download My IDP Dossier (PDF)
         </button>
       </div>
     </div>
 
-    <!-- Contact Cards -->
+    <!-- Department Contacts -->
     <div class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm space-y-4">
       <div class="border-b border-slate-100 pb-3">
         <h3 class="text-base font-bold text-slate-900">Departmental Contact & Placement Cell</h3>
@@ -430,8 +427,8 @@
       }
     }
 
-    // DIRECT jsPDF GENERATION (ZERO SCREENSHOT RELIANCE)
-    function generateProgrammaticPDF() {
+    // 100% RELIABLE BROWSER-NATIVE PRINT / PDF ENGINE
+    function printOrSaveAsPDF() {
       const selectedBoxes = Array.from(document.querySelectorAll('input[name="careerChoice"]:checked'));
       if (selectedBoxes.length === 0) {
         alert("Please select at least one career pathway first.");
@@ -450,153 +447,106 @@
       const indScore = document.getElementById("indScoreDisplay").innerText;
       const today = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
 
-      // Initialize jsPDF
-      const { jsPDF } = window.jspdf;
-      const doc = new jsPDF({
-        orientation: 'portrait',
-        unit: 'mm',
-        format: 'a4'
-      });
+      // Save to localStorage
+      const payload = { date: today, resScore, indScore, pathways, researchDomain, facultyMentor, selectedSkills };
+      localStorage.setItem("careerCompassIDP", JSON.stringify(payload));
 
-      let y = 20;
-
-      // Header Banner
-      doc.setFillColor(15, 23, 42); // slate-900
-      doc.rect(14, y - 6, 182, 22, 'F');
+      // Construct a clean, isolated print document
+      const printWindow = window.open('', '_blank', 'width=800,height=900');
       
-      doc.setFont("helvetica", "bold");
-      doc.setFontSize(16);
-      doc.setTextColor(255, 255, 255);
-      doc.text("CAREER-COMPASS: INDIVIDUAL DEVELOPMENT PLAN", 20, y + 4);
-      
-      doc.setFontSize(8);
-      doc.setFont("helvetica", "normal");
-      doc.setTextColor(203, 213, 225);
-      doc.text("School of Biosciences & Biotechnology | Verified Candidate Dossier", 20, y + 10);
+      const printHTML = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <title>Career-Compass IDP Dossier</title>
+          <style>
+            body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; color: #0f172a; padding: 40px; margin: 0; }
+            .header { border-bottom: 3px solid #0f172a; padding-bottom: 12px; margin-bottom: 24px; display: flex; justify-content: space-between; }
+            .title { font-size: 22px; font-weight: 800; margin: 0; }
+            .subtitle { font-size: 11px; color: #475569; font-weight: 600; text-transform: uppercase; margin-top: 4px; }
+            .meta { text-align: right; font-size: 11px; color: #475569; }
+            .score-box { display: flex; gap: 16px; margin-bottom: 24px; }
+            .score-card { flex: 1; padding: 14px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; }
+            .score-label { font-size: 10px; font-weight: 700; color: #64748b; text-transform: uppercase; }
+            .score-val { font-size: 20px; font-weight: 800; margin-top: 4px; }
+            .res-color { color: #1d4ed8; }
+            .ind-color { color: #059669; }
+            .section { margin-bottom: 24px; }
+            .sec-title { font-size: 12px; font-weight: 700; text-transform: uppercase; border-bottom: 1px solid #cbd5e1; padding-bottom: 4px; margin-bottom: 10px; }
+            ul { margin: 0; padding-left: 18px; font-size: 11px; color: #334155; line-height: 1.8; }
+            .skill-item { margin-bottom: 6px; font-size: 11px; color: #1e293b; }
+            .footer { border-top: 1px solid #94a3b8; padding-top: 30px; margin-top: 50px; display: flex; justify-content: space-between; }
+            .sig-block { width: 45%; border-top: 1px solid #0f172a; padding-top: 6px; font-size: 10px; color: #64748b; }
+            @media print {
+              body { padding: 20px; }
+            }
+          </style>
+        </head>
+        <body>
+          <div class="header">
+            <div>
+              <h1 class="title">CAREER-COMPASS</h1>
+              <div class="subtitle">Individual Development Plan (IDP) Dossier</div>
+              <div style="font-size: 11px; color: #64748b; margin-top: 2px;">School of Biosciences & Biotechnology</div>
+            </div>
+            <div class="meta">
+              <p style="margin: 0;"><strong>Date:</strong> ${today}</p>
+              <p style="margin: 2px 0 0 0;"><strong>Status:</strong> Approved Candidate Plan</p>
+            </div>
+          </div>
 
-      y += 26;
+          <div class="score-box">
+            <div class="score-card">
+              <div class="score-label">Research & PhD Match</div>
+              <div class="score-val res-color">${resScore !== "--%" ? resScore : "Recorded via Self-Assessment"}</div>
+            </div>
+            <div class="score-card">
+              <div class="score-label">Biotech Industry Match</div>
+              <div class="score-val ind-color">${indScore !== "--%" ? indScore : "Recorded via Self-Assessment"}</div>
+            </div>
+          </div>
 
-      // Metadata Bar
-      doc.setFontSize(9);
-      doc.setTextColor(51, 65, 85);
-      doc.setFont("helvetica", "bold");
-      doc.text(`Generated Date: ${today}`, 15, y);
-      doc.text(`Candidate Status: Active IDP Recorded`, 120, y);
+          <div class="section">
+            <div class="sec-title">1. Target Career Pathways</div>
+            <ul>
+              ${pathways.map(p => `<li><strong>${p}</strong></li>`).join('')}
+            </ul>
+          </div>
 
-      y += 6;
-      doc.setDrawColor(226, 232, 240);
-      doc.line(14, y, 196, y);
-      y += 8;
+          ${isResearch ? `
+          <div class="section">
+            <div class="sec-title">2. Research Specialization & Mentorship</div>
+            <div style="font-size: 11px; line-height: 1.6; color: #334155;">
+              <p style="margin: 0 0 4px 0;"><strong>Specialization Domain:</strong> ${researchDomain}</p>
+              <p style="margin: 0;"><strong>Faculty Guidance:</strong> ${facultyMentor}</p>
+            </div>
+          </div>
+          ` : ''}
 
-      // Diagnostic Match Scores Box
-      doc.setFillColor(248, 250, 252);
-      doc.roundedRect(14, y, 88, 18, 2, 2, 'FD');
-      doc.roundedRect(108, y, 88, 18, 2, 2, 'FD');
+          <div class="section">
+            <div class="sec-title">3. Individual Development Plan (IDP) Skill Modules</div>
+            <div>
+              ${selectedSkills.map(s => `<div class="skill-item">☑ ${s}</div>`).join('')}
+            </div>
+          </div>
 
-      doc.setFontSize(8);
-      doc.setFont("helvetica", "bold");
-      doc.setTextColor(100, 116, 139);
-      doc.text("RESEARCH / PHD MATCH", 18, y + 6);
-      doc.text("BIOTECH INDUSTRY MATCH", 112, y + 6);
+          <div class="footer">
+            <div class="sig-block">Candidate Signature</div>
+            <div class="sig-block">Placement Coordinator / Faculty Guide Signature</div>
+          </div>
 
-      doc.setFontSize(14);
-      doc.setTextColor(29, 78, 216); // Blue
-      doc.text(resScore !== "--%" ? resScore : "Pending Test", 18, y + 14);
+          <script>
+            window.onload = function() {
+              window.print();
+            };
+          <\/script>
+        </body>
+        </html>
+      `;
 
-      doc.setTextColor(5, 150, 105); // Green
-      doc.text(indScore !== "--%" ? indScore : "Pending Test", 112, y + 14);
-
-      y += 26;
-
-      // Selected Career Pathways Section
-      doc.setFontSize(11);
-      doc.setFont("helvetica", "bold");
-      doc.setTextColor(15, 23, 42);
-      doc.text("1. TARGET CAREER PATHWAYS", 15, y);
-      y += 4;
-      doc.setDrawColor(15, 23, 42);
-      doc.line(15, y, 196, y);
-      y += 6;
-
-      doc.setFontSize(9);
-      doc.setFont("helvetica", "normal");
-      doc.setTextColor(51, 65, 85);
-
-      pathways.forEach(path => {
-        doc.text(`• ${path}`, 20, y);
-        y += 6;
-      });
-
-      // Research Section (if applicable)
-      if (isResearch) {
-        y += 4;
-        doc.setFontSize(11);
-        doc.setFont("helvetica", "bold");
-        doc.setTextColor(15, 23, 42);
-        doc.text("2. RESEARCH SPECIALIZATION & ADVISING", 15, y);
-        y += 4;
-        doc.line(15, y, 196, y);
-        y += 6;
-
-        doc.setFontSize(9);
-        doc.setFont("helvetica", "bold");
-        doc.setTextColor(71, 85, 105);
-        doc.text("Primary Domain:", 20, y);
-        doc.setFont("helvetica", "normal");
-        doc.setTextColor(15, 23, 42);
-        doc.text(researchDomain, 55, y);
-        y += 6;
-
-        doc.setFont("helvetica", "bold");
-        doc.setTextColor(71, 85, 105);
-        doc.text("Faculty Guidance:", 20, y);
-        doc.setFont("helvetica", "normal");
-        doc.setTextColor(15, 23, 42);
-        const splitMentor = doc.splitTextToSize(facultyMentor, 135);
-        doc.text(splitMentor, 55, y);
-        y += (splitMentor.length * 5) + 2;
-      }
-
-      // Selected Skills Section
-      y += 4;
-      doc.setFontSize(11);
-      doc.setFont("helvetica", "bold");
-      doc.setTextColor(15, 23, 42);
-      doc.text("3. ACTIVE COMPETENCIES & MODULES TO DEVELOP", 15, y);
-      y += 4;
-      doc.line(15, y, 196, y);
-      y += 6;
-
-      doc.setFontSize(8.5);
-      doc.setFont("helvetica", "normal");
-      doc.setTextColor(51, 65, 85);
-
-      selectedSkills.forEach(skill => {
-        const splitSkill = doc.splitTextToSize(`[✓] ${skill}`, 175);
-        doc.text(splitSkill, 18, y);
-        y += (splitSkill.length * 4.5) + 2;
-
-        // Auto Page Break if content exceeds page
-        if (y > 260) {
-          doc.addPage();
-          y = 20;
-        }
-      });
-
-      // Signature Block at Bottom
-      y = Math.max(y + 10, 255);
-      doc.setDrawColor(148, 163, 184);
-      doc.line(20, y, 85, y);
-      doc.line(125, y, 190, y);
-
-      doc.setFontSize(8);
-      doc.setTextColor(100, 116, 139);
-      doc.text("Candidate Signature", 20, y + 5);
-      doc.text("Placement Coordinator / Guide Signature", 125, y + 5);
-
-      // Trigger instant save
-      doc.save("Career_Compass_IDP_Dossier.pdf");
-      alert("Success! Your IDP Dossier PDF has been generated and downloaded. Submit this signed copy to the Placement Coordinator or Faculty Committee.");
+      printWindow.document.open();
+      printWindow.document.write(printHTML);
+      printWindow.document.close();
     }
 
     function openModal() { document.getElementById("quizModal").classList.remove("hidden"); }
