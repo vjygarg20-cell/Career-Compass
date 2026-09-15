@@ -3,25 +3,27 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Career-Compass | Biosciences IDP & Career Diagnostic</title>
-  <!-- Tailwind CSS CDN for instant styling -->
+  <title>Career-Compass | Biosciences Career Diagnostic & IDP Portal</title>
+  <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
+  <!-- html2pdf.js for instant client-side PDF downloads -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 </head>
 <body class="bg-slate-50 text-slate-800 font-sans min-h-screen flex flex-col">
 
-  <!-- Navigation Bar -->
+  <!-- Header -->
   <header class="bg-slate-900 text-white shadow sticky top-0 z-30">
-    <div class="max-w-6xl mx-auto px-4 py-3 flex justify-between items-center">
+    <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
       <div class="flex items-center gap-3">
         <span class="text-2xl">🧭</span>
         <div>
-          <h1 class="text-lg font-bold tracking-tight leading-tight">Career-Compass</h1>
-          <p class="text-xs text-slate-400">Biosciences Aptitude Diagnostic & IDP Platform</p>
+          <h1 class="text-lg font-bold tracking-tight">Career-Compass</h1>
+          <p class="text-xs text-slate-400">Biosciences Holland-Code Diagnostic & IDP Engine</p>
         </div>
       </div>
       <div class="flex items-center gap-2">
         <button onclick="openAssessmentModal()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1.5 rounded-lg text-xs font-semibold transition">
-          Retake Diagnostic Test
+          Retake Career Quiz
         </button>
         <button onclick="openBookingModal()" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded-lg text-xs font-semibold transition">
           Book Faculty Slot
@@ -31,438 +33,625 @@
   </header>
 
   <!-- Main Container -->
-  <main class="max-w-6xl mx-auto px-4 py-6 space-y-6 flex-1 w-full">
+  <main class="max-w-7xl mx-auto px-4 py-6 space-y-6 flex-1 w-full">
 
-    <!-- Diagnostic Score Banner (Dynamic Results) -->
-    <div id="scoreBanner" class="bg-gradient-to-r from-slate-900 to-slate-800 text-white rounded-xl p-6 shadow-md">
-      <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
-        <div>
-          <span class="bg-blue-500/20 text-blue-300 text-xs font-bold px-2.5 py-1 rounded border border-blue-400/30 uppercase tracking-wider">Aptitude & Interest Diagnostic</span>
-          <h2 class="text-2xl font-extrabold mt-2 text-white">Your Pathway Readiness Scores</h2>
-          <p class="text-slate-300 text-xs mt-1" id="recommendationText">Complete the diagnostic test to calculate your Research and Industry match scores.</p>
-        </div>
-
-        <div class="flex flex-col sm:flex-row gap-4 w-full md:w-auto">
-          <!-- Research Score Gauge -->
-          <div class="bg-slate-800/80 border border-slate-700 p-4 rounded-lg w-full sm:w-48 text-center">
-            <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Research / PhD Match</span>
-            <div class="text-3xl font-black text-blue-400 my-1" id="researchScoreDisplay">--/100</div>
-            <div class="w-full bg-slate-700 rounded-full h-2">
-              <div id="researchScoreBar" class="bg-blue-500 h-2 rounded-full transition-all duration-500" style="width: 0%"></div>
+    <!-- Diagnostic Score Banner -->
+    <div class="bg-gradient-to-r from-slate-900 via-slate-800 to-indigo-950 text-white rounded-xl p-6 shadow-md border border-slate-700">
+      <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
+        <div class="space-y-2 max-w-2xl">
+          <div class="flex items-center gap-2">
+            <span class="bg-blue-500/20 text-blue-300 text-xs font-bold px-2.5 py-0.5 rounded border border-blue-400/30 uppercase">
+              Holland Code (RIASEC) Bioscience Profile
+            </span>
+            <span id="archetypePill" class="bg-emerald-500/20 text-emerald-300 text-xs font-bold px-2.5 py-0.5 rounded border border-emerald-400/30 uppercase">
+              Profile: Analytical Evaluator
+            </span>
+          </div>
+          <h2 class="text-2xl font-black text-white" id="matchedRoleTitle">Molecular Discovery & Bioassay Scientist</h2>
+          <p class="text-xs md:text-sm text-slate-300" id="archetypeSummary">
+            Based on your work themes, you combine deep mechanistic scientific curiosity with structured laboratory precision.
+          </p>
+          
+          <!-- Career & Institute Targets -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2 text-xs">
+            <div class="bg-white/10 p-3 rounded-lg border border-white/10">
+              <span class="text-slate-400 uppercase font-bold tracking-wider block text-[10px]">Recommended Research Institutes</span>
+              <p class="font-semibold text-white mt-0.5" id="targetInstitutes">IISc Bangalore, CSIR-CCMB, NCBS, ICGEB, NII New Delhi</p>
+            </div>
+            <div class="bg-white/10 p-3 rounded-lg border border-white/10">
+              <span class="text-slate-400 uppercase font-bold tracking-wider block text-[10px]">Recommended Biotech/Pharma Employers</span>
+              <p class="font-semibold text-white mt-0.5" id="targetCompanies">Biocon Biologics, Syngene International, Dr. Reddy's, Serum Institute</p>
             </div>
           </div>
+        </div>
 
-          <!-- Industry Score Gauge -->
-          <div class="bg-slate-800/80 border border-slate-700 p-4 rounded-lg w-full sm:w-48 text-center">
-            <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Biotech Industry Match</span>
-            <div class="text-3xl font-black text-emerald-400 my-1" id="industryScoreDisplay">--/100</div>
+        <!-- Scores Gauge -->
+        <div class="flex flex-row sm:flex-col gap-3 w-full lg:w-56 shrink-0">
+          <div class="bg-slate-800/90 border border-slate-700 p-3 rounded-lg text-center flex-1">
+            <span class="text-[11px] font-bold text-slate-400 uppercase">Research / PhD Match</span>
+            <div class="text-2xl font-black text-blue-400 my-0.5" id="resScoreText">75/100</div>
             <div class="w-full bg-slate-700 rounded-full h-2">
-              <div id="industryScoreBar" class="bg-emerald-500 h-2 rounded-full transition-all duration-500" style="width: 0%"></div>
+              <div id="resScoreBar" class="bg-blue-500 h-2 rounded-full transition-all duration-500" style="width: 75%"></div>
+            </div>
+          </div>
+          <div class="bg-slate-800/90 border border-slate-700 p-3 rounded-lg text-center flex-1">
+            <span class="text-[11px] font-bold text-slate-400 uppercase">Biotech Industry Match</span>
+            <div class="text-2xl font-black text-emerald-400 my-0.5" id="indScoreText">55/100</div>
+            <div class="w-full bg-slate-700 rounded-full h-2">
+              <div id="indScoreBar" class="bg-emerald-500 h-2 rounded-full transition-all duration-500" style="width: 55%"></div>
             </div>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- Navigation Tabs: IDP, Research Module, Industry Module -->
+    <!-- Navigation Tabs -->
     <div class="flex border-b border-slate-200 overflow-x-auto gap-2">
-      <button id="tabIDP" onclick="switchView('idp')" class="py-3 px-4 font-bold text-sm text-blue-600 border-b-2 border-blue-600 transition whitespace-nowrap">
-        📝 My Individual Development Plan (IDP)
+      <button id="tabIDP" onclick="switchTab('idp')" class="py-3 px-4 font-bold text-sm text-blue-600 border-b-2 border-blue-600 transition whitespace-nowrap">
+        📝 Individual Development Plan (IDP)
       </button>
-      <button id="tabResearch" onclick="switchView('research')" class="py-3 px-4 font-semibold text-sm text-slate-500 hover:text-slate-800 transition whitespace-nowrap">
-        🔬 Research & Fellowship Module (CSIR/DBT)
+      <button id="tabCSIR" onclick="switchTab('csir')" class="py-3 px-4 font-semibold text-sm text-slate-500 hover:text-slate-800 transition whitespace-nowrap">
+        🔬 CSIR-NET Life Sciences Vault & Notes
       </button>
-      <button id="tabIndustry" onclick="switchView('industry')" class="py-3 px-4 font-semibold text-sm text-slate-500 hover:text-slate-800 transition whitespace-nowrap">
-        🏭 Biotech Industry & Placement Hub
+      <button id="tabIndustry" onclick="switchTab('industry')" class="py-3 px-4 font-semibold text-sm text-slate-500 hover:text-slate-800 transition whitespace-nowrap">
+        🏭 Biotech Industry Placement & Soft Skills
       </button>
     </div>
 
-    <!-- VIEW 1: INDIVIDUAL DEVELOPMENT PLAN (IDP) -->
+    <!-- TAB 1: INDIVIDUAL DEVELOPMENT PLAN (IDP) -->
     <div id="viewIDP" class="space-y-6">
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
-          <span class="text-xs font-bold text-slate-400 uppercase">Current Milestone Progress</span>
-          <div class="text-2xl font-black text-slate-900 mt-1" id="idpCompletionPct">60% Complete</div>
-          <div class="w-full bg-slate-100 rounded-full h-2.5 mt-2">
-            <div id="idpProgressBar" class="bg-blue-600 h-2.5 rounded-full" style="width: 60%"></div>
+      
+      <!-- Printable/Exportable Canvas Wrapper -->
+      <div id="printableIDPArea" class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm space-y-6">
+        
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b border-slate-200 pb-4 gap-4">
+          <div>
+            <h3 class="text-xl font-bold text-slate-900">Student Individual Development Dossier (IDP)</h3>
+            <p class="text-xs text-slate-500">Program: Master of Science (Biosciences) • Academic Year 2026</p>
+          </div>
+          <button onclick="downloadIDPPdf()" class="bg-slate-900 hover:bg-slate-800 text-white font-semibold px-4 py-2 rounded-lg text-xs flex items-center gap-2 shadow-sm transition">
+            <span>📥</span> Download IDP Dossier (PDF)
+          </button>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
+          <div class="p-3 bg-slate-50 rounded-lg border border-slate-200">
+            <span class="text-slate-500 font-bold uppercase block text-[10px]">Primary Track Target</span>
+            <span class="font-bold text-slate-900 text-sm mt-1 block" id="idpTargetTrack">Academic Research & CSIR-NET JRF</span>
+          </div>
+          <div class="p-3 bg-slate-50 rounded-lg border border-slate-200">
+            <span class="text-slate-500 font-bold uppercase block text-[10px]">Advisor / Guide</span>
+            <span class="font-bold text-slate-900 text-sm mt-1 block">Dr. Vijay Kumar (Room 304)</span>
+          </div>
+          <div class="p-3 bg-slate-50 rounded-lg border border-slate-200">
+            <span class="text-slate-500 font-bold uppercase block text-[10px]">IDP Milestone Status</span>
+            <span class="font-bold text-blue-600 text-sm mt-1 block" id="idpStatusPct">60% Complete (3/5 Milestones)</span>
           </div>
         </div>
-        <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
-          <span class="text-xs font-bold text-slate-400 uppercase">Current Academic Target</span>
-          <div class="text-sm font-bold text-slate-900 mt-2">MSc Semester 3: Mid-Term Dossier</div>
-          <p class="text-xs text-slate-500 mt-1">Due: Final Week of Semester</p>
+
+        <!-- Semester Action Checklist -->
+        <div class="space-y-3">
+          <h4 class="text-sm font-bold text-slate-900 uppercase tracking-wide">Semester Milestones & Credential Verification</h4>
+          <div class="space-y-2" id="idpChecklist">
+            <label class="flex items-center gap-3 p-3 bg-slate-50 rounded-lg border border-slate-200 text-xs cursor-pointer">
+              <input type="checkbox" onchange="refreshIDP()" checked class="w-4 h-4 text-blue-600 rounded" />
+              <span class="line-through text-slate-400">Complete Biosafety Level 2 (BSL-2) aseptic cell culture handling & certification</span>
+            </label>
+            <label class="flex items-center gap-3 p-3 bg-slate-50 rounded-lg border border-slate-200 text-xs cursor-pointer">
+              <input type="checkbox" onchange="refreshIDP()" checked class="w-4 h-4 text-blue-600 rounded" />
+              <span class="line-through text-slate-400">Literature review & 1-page hypothesis draft on mechanistic target</span>
+            </label>
+            <label class="flex items-center gap-3 p-3 bg-slate-50 rounded-lg border border-slate-200 text-xs cursor-pointer">
+              <input type="checkbox" onchange="refreshIDP()" checked class="w-4 h-4 text-blue-600 rounded" />
+              <span class="line-through text-slate-400">Complete Unit 1 & Unit 13 diagnostic problem sets on Career-Compass</span>
+            </label>
+            <label class="flex items-center gap-3 p-3 bg-slate-50 rounded-lg border border-slate-200 text-xs cursor-pointer">
+              <input type="checkbox" onchange="refreshIDP()" class="w-4 h-4 text-blue-600 rounded" />
+              <span class="text-slate-800 font-medium">Analytical instrument sign-off (HPLC / Western Blot protocol validation)</span>
+            </label>
+            <label class="flex items-center gap-3 p-3 bg-slate-50 rounded-lg border border-slate-200 text-xs cursor-pointer">
+              <input type="checkbox" onchange="refreshIDP()" class="w-4 h-4 text-blue-600 rounded" />
+              <span class="text-slate-800 font-medium">1:1 Consultation with Faculty Mentor for thesis proposal critique</span>
+            </label>
+          </div>
         </div>
-        <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
-          <span class="text-xs font-bold text-slate-400 uppercase">Assigned Faculty Advisor</span>
-          <div class="text-sm font-bold text-slate-900 mt-2">Dr. Vijay Kumar</div>
-          <p class="text-xs text-slate-500 mt-1">Biomolecular Assays & Neurobiology</p>
-        </div>
+
       </div>
 
-      <!-- IDP Milestone Checklist -->
+    </div>
+
+    <!-- TAB 2: CSIR-NET LIFE SCIENCES VAULT & UNIT NOTES -->
+    <div id="viewCSIR" class="hidden space-y-6">
+      
       <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm space-y-4">
         <div class="flex justify-between items-center border-b border-slate-100 pb-3">
-          <h3 class="text-base font-bold text-slate-900">Semester 3 Actionable Milestones</h3>
-          <span class="text-xs bg-blue-50 text-blue-700 font-semibold px-2 py-0.5 rounded">Active Sprint</span>
-        </div>
-        <div class="space-y-3" id="idpMilestoneList">
-          <label class="flex items-center gap-3 p-3 bg-slate-50 rounded-lg border border-slate-200 text-sm cursor-pointer hover:bg-slate-100">
-            <input type="checkbox" onchange="calcIDP()" checked class="w-4 h-4 text-blue-600 rounded" />
-            <span class="line-through text-slate-400">Complete Biosafety Level 2 (BSL-2) handling & sterile hood certification</span>
-          </label>
-          <label class="flex items-center gap-3 p-3 bg-slate-50 rounded-lg border border-slate-200 text-sm cursor-pointer hover:bg-slate-100">
-            <input type="checkbox" onchange="calcIDP()" checked class="w-4 h-4 text-blue-600 rounded" />
-            <span class="line-through text-slate-400">Literature review & 1-page hypothesis draft for dissertation</span>
-          </label>
-          <label class="flex items-center gap-3 p-3 bg-slate-50 rounded-lg border border-slate-200 text-sm cursor-pointer hover:bg-slate-100">
-            <input type="checkbox" onchange="calcIDP()" checked class="w-4 h-4 text-blue-600 rounded" />
-            <span class="line-through text-slate-400">Complete Unit 1 & Unit 13 diagnostic mocks on the portal</span>
-          </label>
-          <label class="flex items-center gap-3 p-3 bg-slate-50 rounded-lg border border-slate-200 text-sm cursor-pointer hover:bg-slate-100">
-            <input type="checkbox" onchange="calcIDP()" class="w-4 h-4 text-blue-600 rounded" />
-            <span class="text-slate-800 font-medium">Verify Analytical HPLC or Western Blot calibration protocol</span>
-          </label>
-          <label class="flex items-center gap-3 p-3 bg-slate-50 rounded-lg border border-slate-200 text-sm cursor-pointer hover:bg-slate-100">
-            <input type="checkbox" onchange="calcIDP()" class="w-4 h-4 text-blue-600 rounded" />
-            <span class="text-slate-800 font-medium">Attend 1:1 Faculty Mentorship session for proposal critique</span>
-          </label>
-        </div>
-      </div>
-    </div>
-
-    <!-- VIEW 2: RESEARCH & FELLOWSHIP MODULE -->
-    <div id="viewResearch" class="hidden space-y-6">
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <!-- CSIR Practice Drill -->
-        <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm space-y-4">
-          <div class="flex justify-between items-center">
-            <h3 class="font-bold text-slate-900 text-base">CSIR-UGC NET Part-C Problem Drill</h3>
-            <span class="text-xs bg-indigo-50 text-indigo-700 font-bold px-2 py-0.5 rounded">4 Marks</span>
+          <div>
+            <h3 class="text-lg font-bold text-slate-900">CSIR-UGC NET Life Sciences High-Yield Vault</h3>
+            <p class="text-xs text-slate-500">Unit-wise curated summary notes, formulas, and high-frequency Part-C problem areas.</p>
           </div>
-          <div class="p-4 bg-slate-50 rounded-lg border border-slate-200 space-y-3">
-            <p class="text-xs text-slate-500 font-semibold uppercase">Topic: Unit 13 (Membrane FRAP Kinetics)</p>
-            <p class="text-xs md:text-sm text-slate-800 font-medium leading-relaxed">
-              In a FRAP experiment on receptor protein X, control cells recover 90% fluorescence within 120 sec. Cells treated with Compound W show only 12% recovery over 300 sec. Which inference is most plausible?
-            </p>
-            <div class="space-y-2 text-xs">
-              <label class="flex items-center gap-2 p-2 bg-white rounded border border-slate-200 hover:bg-blue-50 cursor-pointer">
-                <input type="radio" name="res_mock" value="A" />
-                <span><strong>(A)</strong> Compound W anchors receptor X to the cortical cytoskeleton.</span>
-              </label>
-              <label class="flex items-center gap-2 p-2 bg-white rounded border border-slate-200 hover:bg-blue-50 cursor-pointer">
-                <input type="radio" name="res_mock" value="B" />
-                <span><strong>(B)</strong> Compound W dramatically increases lateral lipid bilayer fluidity.</span>
-              </label>
+          <button onclick="downloadUnitNotes('ALL')" class="bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition">
+            <span>📥</span> Download Full Syllabus Notes (.txt)
+          </button>
+        </div>
+
+        <!-- Unit Accordion Cards -->
+        <div class="space-y-3" id="unitsAccordion">
+
+          <!-- Unit 1 -->
+          <div class="border border-slate-200 rounded-lg p-4 bg-slate-50">
+            <div class="flex justify-between items-center cursor-pointer" onclick="toggleUnit('u1Details')">
+              <span class="font-bold text-slate-900 text-sm">Unit 1: Molecules & Their Interaction (Biochemistry)</span>
+              <span class="text-blue-600 text-xs font-semibold">Toggle Notes ▾</span>
             </div>
-            <button onclick="checkResearchAnswer()" class="text-xs bg-slate-900 text-white font-semibold py-1.5 px-3 rounded hover:bg-slate-800">
-              Verify Solution
-            </button>
+            <div id="u1Details" class="hidden mt-3 pt-3 border-t border-slate-200 text-xs space-y-2 text-slate-700">
+              <p><strong>• Protein Conformation:</strong> Ramachandran plot angles ($\\phi, \\psi$); Glycine has greatest conformational flexibility, Proline is constrained.</p>
+              <p><strong>• Enzyme Kinetics:</strong> $V = \\frac{V_{max}[S]}{K_m + [S]}$; Competitive inhibition (increases apparent $K_m$, $V_{max}$ unchanged); Uncompetitive inhibition (decreases both $V_{max}$ and $K_m$).</p>
+              <p><strong>• Bioenergetics:</strong> Standard free energy change $\\Delta G^\circ = -RT \\ln K_{eq}$; coupled reactions drive thermodynamically unfavorable pathways.</p>
+              <button onclick="downloadUnitNotes('Unit1')" class="mt-2 text-blue-600 hover:underline font-semibold text-xs">Download Unit 1 Revision Sheet &rarr;</button>
+            </div>
           </div>
-        </div>
 
-        <!-- Academic Research Skills -->
-        <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm space-y-4">
-          <h3 class="font-bold text-slate-900 text-base">Fellowship & Academic Curriculum Vault</h3>
-          <ul class="space-y-3 text-xs text-slate-700">
-            <li class="p-3 bg-slate-50 rounded-lg border border-slate-200 flex justify-between items-center">
-              <span>📚 <strong>CSIR High-Yield Units:</strong> Unit 1, 2, 3, 4, 8 & 13 Cheat Sheets</span>
-              <span class="text-blue-600 font-semibold cursor-pointer hover:underline">Download PDF</span>
-            </li>
-            <li class="p-3 bg-slate-50 rounded-lg border border-slate-200 flex justify-between items-center">
-              <span>✍️ <strong>PhD Proposal Builder:</strong> Hypothesis, Aims & Methodology Blueprint</span>
-              <span class="text-blue-600 font-semibold cursor-pointer hover:underline">Access Guide</span>
-            </li>
-            <li class="p-3 bg-slate-50 rounded-lg border border-slate-200 flex justify-between items-center">
-              <span>🎯 <strong>PI Mapping:</strong> Target national research institutes (IISc, CSIR labs, IITs)</span>
-              <span class="text-blue-600 font-semibold cursor-pointer hover:underline">View Matrix</span>
-            </li>
-          </ul>
+          <!-- Unit 2 -->
+          <div class="border border-slate-200 rounded-lg p-4 bg-slate-50">
+            <div class="flex justify-between items-center cursor-pointer" onclick="toggleUnit('u2Details')">
+              <span class="font-bold text-slate-900 text-sm">Unit 2: Cellular Organization & Membrane Dynamics</span>
+              <span class="text-blue-600 text-xs font-semibold">Toggle Notes ▾</span>
+            </div>
+            <div id="u2Details" class="hidden mt-3 pt-3 border-t border-slate-200 text-xs space-y-2 text-slate-700">
+              <p><strong>• Membrane Structure:</strong> Lipid rafts enriched in cholesterol and sphingolipids; FRAP measures lateral diffusion coefficient ($D$).</p>
+              <p><strong>• Protein Sorting:</strong> Signal recognition particle (SRP) pathways; KDEL retrieval sequences for ER-resident proteins; NLS targeting to nucleus via importins.</p>
+              <p><strong>• Cell Cycle:</strong> Cyclin-CDK checkpoints (CDK1/Cyclin B for G2-M; p53-p21 axis arresting damaged cells at G1-S).</p>
+              <button onclick="downloadUnitNotes('Unit2')" class="mt-2 text-blue-600 hover:underline font-semibold text-xs">Download Unit 2 Revision Sheet &rarr;</button>
+            </div>
+          </div>
+
+          <!-- Unit 4 -->
+          <div class="border border-slate-200 rounded-lg p-4 bg-slate-50">
+            <div class="flex justify-between items-center cursor-pointer" onclick="toggleUnit('u4Details')">
+              <span class="font-bold text-slate-900 text-sm">Unit 4: Cell Communication & Immunology</span>
+              <span class="text-blue-600 text-xs font-semibold">Toggle Notes ▾</span>
+            </div>
+            <div id="u4Details" class="hidden mt-3 pt-3 border-t border-slate-200 text-xs space-y-2 text-slate-700">
+              <p><strong>• Signaling Pathways:</strong> GPCR (G$\\alpha_s$ activates adenylate cyclase; G$\\alpha_q$ activates PLC-$\\beta$ generating IP3 & DAG); Receptor Tyrosine Kinases (RTK $\\rightarrow$ Ras-MAPK).</p>
+              <p><strong>• Apoptosis:</strong> Intrinsic pathway (Bcl-2 family, Cytochrome c release from mitochondria, Apaf-1 apoptosome, Caspase-9/3) vs. Extrinsic (FasL / TNF-$\\alpha$, Caspase-8).</p>
+              <p><strong>• Immunology:</strong> MHC Class I presents endogenous peptides to CD8+ T cells; MHC Class II presents exogenous peptides to CD4+ T cells.</p>
+              <button onclick="downloadUnitNotes('Unit4')" class="mt-2 text-blue-600 hover:underline font-semibold text-xs">Download Unit 4 Revision Sheet &rarr;</button>
+            </div>
+          </div>
+
+          <!-- Unit 13 -->
+          <div class="border border-slate-200 rounded-lg p-4 bg-slate-50">
+            <div class="flex justify-between items-center cursor-pointer" onclick="toggleUnit('u13Details')">
+              <span class="font-bold text-slate-900 text-sm">Unit 13: Methods in Biology (Critical for Part C)</span>
+              <span class="text-blue-600 text-xs font-semibold">Toggle Notes ▾</span>
+            </div>
+            <div id="u13Details" class="hidden mt-3 pt-3 border-t border-slate-200 text-xs space-y-2 text-slate-700">
+              <p><strong>• Biophysical Methods:</strong> Circular Dichroism (CD) detects $\\alpha$-helices (208 & 222 nm) and $\\beta$-sheets (218 nm); FRET measures molecular distance between 1–10 nm ($E = \\frac{R_0^6}{R_0^6 + r^6}$).</p>
+              <p><strong>• Molecular Biology:</strong> CRISPR/Cas9 (sgRNA + PAM sequence NGG); RT-qPCR relative quantification via $\\Delta\\Delta C_t$ method.</p>
+              <p><strong>• Separation Techniques:</strong> Size-exclusion chromatography (large proteins elute first); SDS-PAGE separates strictly based on molecular mass.</p>
+              <button onclick="downloadUnitNotes('Unit13')" class="mt-2 text-blue-600 hover:underline font-semibold text-xs">Download Unit 13 Revision Sheet &rarr;</button>
+            </div>
+          </div>
+
         </div>
       </div>
+
     </div>
 
-    <!-- VIEW 3: BIOTECH INDUSTRY & PLACEMENT MODULE -->
+    <!-- TAB 3: BIOTECH INDUSTRY PLACEMENT & SOFT SKILLS -->
     <div id="viewIndustry" class="hidden space-y-6">
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <!-- Industry Standards & SOPs -->
+      
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        
+        <!-- Industrial Regulations & QC -->
         <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm space-y-4">
-          <h3 class="font-bold text-slate-900 text-base">Modern Biopharma Competencies</h3>
-          <p class="text-xs text-slate-500">Skills required by top biotech, biomanufacturing, and QC/QA employers.</p>
-          <div class="space-y-2.5 text-xs text-slate-700">
+          <h3 class="text-base font-bold text-slate-900">Biopharma Technical Standards</h3>
+          <div class="space-y-3 text-xs">
             <div class="p-3 bg-slate-50 rounded-lg border border-slate-200">
-              <strong class="text-slate-900 block mb-1">📋 cGMP & GLP Regulatory Compliance</strong>
-              Documentation hygiene, batch records, out-of-specification (OOS) procedures, and audit trail discipline.
+              <strong class="text-slate-900 block mb-1">ICH Q2(R1) Assay Validation Protocol</strong>
+              Required for QC lab interviews: Specificity, Linearity ($r^2 \ge 0.995$), Accuracy (recovery %), Precision (repeatability & intermediate precision), Limit of Detection (LOD = $3.3\\sigma/S$), Limit of Quantitation (LOQ = $10\\sigma/S$).
             </div>
             <div class="p-3 bg-slate-50 rounded-lg border border-slate-200">
-              <strong class="text-slate-900 block mb-1">🧪 Analytical Assay Validation</strong>
-              ICH Q2(R1) parameters: Limit of Detection (LOD), Limit of Quantitation (LOQ), linearity, and precision.
-            </div>
-            <div class="p-3 bg-slate-50 rounded-lg border border-slate-200">
-              <strong class="text-slate-900 block mb-1">⚙️ Bioprocess Fundamentals</strong>
-              Upstream bioreactor control (DO, pH, impellers) and downstream ultrafiltration/chromatography purification.
+              <strong class="text-slate-900 block mb-1">Out-of-Specification (OOS) Resolution Workflow</strong>
+              Phase 1 lab investigation $\rightarrow$ Test analyst error vs instrument malfunction $\rightarrow$ Retesting criteria $\rightarrow$ Corrective & Preventive Action (CAPA).
             </div>
           </div>
         </div>
 
-        <!-- Soft Skills & Placement Readiness -->
+        <!-- Soft Skills & Placement Kit -->
         <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm space-y-4">
-          <h3 class="font-bold text-slate-900 text-base">Soft Skills & Placement Accelerator</h3>
-          <ul class="space-y-2.5 text-xs text-slate-700">
-            <li class="p-3 bg-blue-50/70 border border-blue-100 rounded-lg">
-              <span class="font-bold text-blue-900 block">📄 ATS Biotechnology Resume Builder</span>
-              Format protocols as quantitative outcomes (e.g., <em>"Validated assay sensitivity with &lt;5% CV"</em>).
-            </li>
-            <li class="p-3 bg-slate-50 border border-slate-200 rounded-lg">
-              <span class="font-bold text-slate-800 block">✉️ Executive Cold-Email Templates</span>
-              Outreach templates to R&D hiring managers and CRO HR teams for industrial internships.
-            </li>
-            <li class="p-3 bg-slate-50 border border-slate-200 rounded-lg">
-              <span class="font-bold text-slate-800 block">🗣️ Group Discussion & Pitching Drills</span>
-              Topics: <em>Biosimilar regulatory pathways vs Innovator biologics</em>, <em>AI in high-throughput drug screening</em>.
-            </li>
-          </ul>
+          <h3 class="text-base font-bold text-slate-900">Soft Skills & Placement Kit</h3>
+          <div class="space-y-2.5 text-xs text-slate-700">
+            <div class="p-3 bg-blue-50/70 border border-blue-100 rounded-lg">
+              <span class="font-bold text-blue-900 block">📄 ATS Resume Bullet Converter</span>
+              <p class="mt-1">Weak: <em>"Ran ELISA assays for protein detection."</em></p>
+              <p class="text-blue-800 font-medium">Strong: <em>"Developed sandwich ELISA protocol detecting target protein down to 0.15 ng/mL with intra-assay precision &lt;4.2% CV."</em></p>
+            </div>
+            <div class="p-3 bg-slate-50 border border-slate-200 rounded-lg flex justify-between items-center">
+              <div>
+                <strong class="text-slate-900 block">Biotech Email Templates</strong>
+                <span class="text-slate-500">Cold outreach to CRO directors & HR recruiters.</span>
+              </div>
+              <button onclick="downloadEmailTemplate()" class="text-blue-600 hover:underline font-semibold">Download (.txt)</button>
+            </div>
+            <div class="p-3 bg-slate-50 border border-slate-200 rounded-lg">
+              <strong class="text-slate-900 block mb-1">Group Discussion (GD) Hot Topics</strong>
+              <p class="text-slate-600">• Biosimilar approval pathway: CDSCO vs US FDA.</p>
+              <p class="text-slate-600">• Gene editing therapeutics: Affordability in emerging healthcare markets.</p>
+            </div>
+          </div>
         </div>
+
+      </div>
+
+    </div>
+
+    <!-- Faculty Office Hours Booking & Mentorship Table -->
+    <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-6 space-y-4">
+      <div class="flex justify-between items-center">
+        <div>
+          <h3 class="text-base font-bold text-slate-900">Faculty Mentors & Office Hours</h3>
+          <p class="text-xs text-slate-500">Book direct 1:1 problem-solving or IDP milestone sign-off sessions.</p>
+        </div>
+      </div>
+      <div class="overflow-x-auto">
+        <table class="w-full text-left text-xs md:text-sm text-slate-600">
+          <thead class="bg-slate-50 text-slate-800 uppercase font-semibold text-xs border-b border-slate-200">
+            <tr>
+              <th class="py-3 px-4">Faculty Mentor</th>
+              <th class="py-3 px-4">Research Domain</th>
+              <th class="py-3 px-4">Consultation Window</th>
+              <th class="py-3 px-4">Office / Cabin</th>
+              <th class="py-3 px-4 text-right">Action</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-100">
+            <tr>
+              <td class="py-3 px-4 font-semibold text-slate-900">Dr. Vijay Kumar</td>
+              <td class="py-3 px-4">Biomolecular Assays, Tau Protein & Seed Amplification</td>
+              <td class="py-3 px-4">Tue & Thu (2:30 PM - 4:00 PM)</td>
+              <td class="py-3 px-4">Room 304</td>
+              <td class="py-3 px-4 text-right">
+                <button onclick="openBookingModal('Dr. Vijay Kumar')" class="text-blue-600 hover:text-blue-800 font-semibold text-xs">Book Slot &rarr;</button>
+              </td>
+            </tr>
+            <tr>
+              <td class="py-3 px-4 font-semibold text-slate-900">Dr. A. Sharma</td>
+              <td class="py-3 px-4">Bioprocess Optimization & Microbial Fermentation</td>
+              <td class="py-3 px-4">Mon & Wed (3:00 PM - 4:30 PM)</td>
+              <td class="py-3 px-4">Room 208</td>
+              <td class="py-3 px-4 text-right">
+                <button onclick="openBookingModal('Dr. A. Sharma')" class="text-blue-600 hover:text-blue-800 font-semibold text-xs">Book Slot &rarr;</button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
       </div>
     </div>
 
   </main>
 
-  <!-- SKILL & INTEREST MATCH ASSESSMENT MODAL (Pops up automatically on first visit) -->
+  <!-- POPUP 1: BIOTECH/PHARMA HOLLAND CODE CAREER QUIZ -->
   <div id="assessmentModal" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-    <div class="bg-white rounded-2xl shadow-2xl max-w-2xl w-full p-6 md:p-8 space-y-6 max-h-[90vh] overflow-y-auto border border-slate-200">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-3xl w-full p-6 md:p-8 space-y-5 max-h-[90vh] overflow-y-auto border border-slate-200">
       
-      <div class="border-b border-slate-100 pb-4">
-        <span class="text-xs font-bold text-indigo-600 uppercase tracking-wider">Diagnostic Intake Assessment</span>
-        <h3 class="text-xl font-extrabold text-slate-900 mt-1">Discover Your Biosciences Match</h3>
-        <p class="text-xs text-slate-500 mt-1">Answer these 6 questions across reasoning, research problem-solving, and process execution to calculate your pathway scores.</p>
+      <div class="border-b border-slate-100 pb-3">
+        <span class="text-xs font-bold text-indigo-600 uppercase tracking-wider">Career Diagnostic Intake</span>
+        <h3 class="text-xl font-black text-slate-900 mt-1">Biosciences RIASEC & Career Fit Quiz</h3>
+        <p class="text-xs text-slate-500">Measures your preferences across Realistic, Investigative, Artistic, Enterprising, and Conventional life science themes.</p>
       </div>
 
-      <form id="quizForm" onsubmit="calculateScores(event)" class="space-y-5">
+      <form id="quizForm" onsubmit="calculateHollandCode(event)" class="space-y-4 text-xs">
         
-        <!-- Q1: Reasoning & Experimental Design -->
-        <div class="space-y-2">
-          <p class="text-xs font-bold text-slate-800">1. Problem-Solving: If your PCR shows persistent non-specific bands, what is your initial instinct?</p>
-          <div class="space-y-1 text-xs">
-            <label class="flex items-center gap-2 p-2 rounded border border-slate-200 hover:bg-slate-50 cursor-pointer">
-              <input type="radio" name="q1" value="research" required class="text-blue-600" />
-              <span>Formulate a hypothesis testing gradient annealing temperatures and thermodynamic primer affinities.</span>
+        <!-- Q1: Realistic (Hands-on bench) vs Investigative (Mechanistic) -->
+        <div class="p-3 bg-slate-50 rounded-lg border border-slate-200 space-y-2">
+          <p class="font-bold text-slate-800">1. Hands-on Benchwork vs Biological Hypotheses:</p>
+          <div class="space-y-1.5">
+            <label class="flex items-center gap-2 cursor-pointer">
+              <input type="radio" name="q1" value="I" required class="text-blue-600" />
+              <span>I enjoy designing experiments to unravel unknown molecular mechanisms and read research papers. (Investigative)</span>
             </label>
-            <label class="flex items-center gap-2 p-2 rounded border border-slate-200 hover:bg-slate-50 cursor-pointer">
-              <input type="radio" name="q1" value="industry" class="text-blue-600" />
-              <span>Consult the standard validated SOP, inspect reagent lot numbers, and perform an instrument calibration check.</span>
-            </label>
-          </div>
-        </div>
-
-        <!-- Q2: Innovation vs Execution -->
-        <div class="space-y-2">
-          <p class="text-xs font-bold text-slate-800">2. Career Value: Which type of everyday challenge excites you more?</p>
-          <div class="space-y-1 text-xs">
-            <label class="flex items-center gap-2 p-2 rounded border border-slate-200 hover:bg-slate-50 cursor-pointer">
-              <input type="radio" name="q2" value="research" required class="text-blue-600" />
-              <span>Investigating unexplained biological anomalies and publishing new mechanistic discoveries.</span>
-            </label>
-            <label class="flex items-center gap-2 p-2 rounded border border-slate-200 hover:bg-slate-50 cursor-pointer">
-              <input type="radio" name="q2" value="industry" class="text-blue-600" />
-              <span>Scaling up bioprocesses, eliminating production errors, and bringing safe diagnostic products to market.</span>
+            <label class="flex items-center gap-2 cursor-pointer">
+              <input type="radio" name="q1" value="R" class="text-blue-600" />
+              <span>I enjoy operating complex physical lab machines (bioreactors, chromatography columns, centrifuges) and hands-on maintenance. (Realistic)</span>
             </label>
           </div>
         </div>
 
-        <!-- Q3: Work Environment & Process -->
-        <div class="space-y-2">
-          <p class="text-xs font-bold text-slate-800">3. Process Style: How do you prefer to approach lab protocols?</p>
-          <div class="space-y-1 text-xs">
-            <label class="flex items-center gap-2 p-2 rounded border border-slate-200 hover:bg-slate-50 cursor-pointer">
-              <input type="radio" name="q3" value="industry" required class="text-blue-600" />
-              <span>Strict adherence to pre-approved checklists, audit logs, and zero-defect documentation.</span>
+        <!-- Q2: Conventional (Audit/QA) vs Artistic (Bio-design) -->
+        <div class="p-3 bg-slate-50 rounded-lg border border-slate-200 space-y-2">
+          <p class="font-bold text-slate-800">2. Structured Compliance vs Innovation:</p>
+          <div class="space-y-1.5">
+            <label class="flex items-center gap-2 cursor-pointer">
+              <input type="radio" name="q2" value="C" required class="text-blue-600" />
+              <span>I value precision, audit trails, standard operating procedures (SOPs), and zero-defect QA/QC checks. (Conventional)</span>
             </label>
-            <label class="flex items-center gap-2 p-2 rounded border border-slate-200 hover:bg-slate-50 cursor-pointer">
-              <input type="radio" name="q3" value="research" class="text-blue-600" />
-              <span>Modifying buffer conditions, testing unproven parameters, and iterative troubleshooting.</span>
-            </label>
-          </div>
-        </div>
-
-        <!-- Q4: Analytical Aptitude -->
-        <div class="space-y-2">
-          <p class="text-xs font-bold text-slate-800">4. Scientific Literature: When reading a peer-reviewed research paper, what draws your focus?</p>
-          <div class="space-y-1 text-xs">
-            <label class="flex items-center gap-2 p-2 rounded border border-slate-200 hover:bg-slate-50 cursor-pointer">
-              <input type="radio" name="q4" value="research" required class="text-blue-600" />
-              <span>The experimental controls, alternate hypotheses, and what novel questions remain unanswered.</span>
-            </label>
-            <label class="flex items-center gap-2 p-2 rounded border border-slate-200 hover:bg-slate-50 cursor-pointer">
-              <input type="radio" name="q4" value="industry" class="text-blue-600" />
-              <span>The patent potential, commercial scalability, and throughput metrics of the assay.</span>
+            <label class="flex items-center gap-2 cursor-pointer">
+              <input type="radio" name="q2" value="A" class="text-blue-600" />
+              <span>I prefer open-ended problem solving, designing novel synthetic biology constructs, or modeling bio-pathways. (Artistic/Creative)</span>
             </label>
           </div>
         </div>
 
-        <!-- Q5: Soft Skills & Team Dynamics -->
-        <div class="space-y-2">
-          <p class="text-xs font-bold text-slate-800">5. Workplace Dynamics: In what team environment do you operate best?</p>
-          <div class="space-y-1 text-xs">
-            <label class="flex items-center gap-2 p-2 rounded border border-slate-200 hover:bg-slate-50 cursor-pointer">
-              <input type="radio" name="q5" value="industry" required class="text-blue-600" />
-              <span>Cross-functional corporate squads with clear KPIs, business deadlines, and client deliverables.</span>
+        <!-- Q3: Enterprising (Biotech Leadership) vs Investigative (Discovery) -->
+        <div class="p-3 bg-slate-50 rounded-lg border border-slate-200 space-y-2">
+          <p class="font-bold text-slate-800">3. Business & Management vs Pure Science:</p>
+          <div class="space-y-1.5">
+            <label class="flex items-center gap-2 cursor-pointer">
+              <input type="radio" name="q3" value="E" required class="text-blue-600" />
+              <span>I am interested in biopharma commercialization, patent strategy, venture capital, and cross-functional teams. (Enterprising)</span>
             </label>
-            <label class="flex items-center gap-2 p-2 rounded border border-slate-200 hover:bg-slate-50 cursor-pointer">
-              <input type="radio" name="q5" value="research" class="text-blue-600" />
-              <span>Independent inquiry within an academic lab with freedom over daily exploration directions.</span>
-            </label>
-          </div>
-        </div>
-
-        <!-- Q6: Regulatory vs Exploration -->
-        <div class="space-y-2">
-          <p class="text-xs font-bold text-slate-800">6. Compliance Mindset: How do you feel about regulatory frameworks (FDA, CDSCO, ISO)?</p>
-          <div class="space-y-1 text-xs">
-            <label class="flex items-center gap-2 p-2 rounded border border-slate-200 hover:bg-slate-50 cursor-pointer">
-              <input type="radio" name="q6" value="industry" required class="text-blue-600" />
-              <span>I find regulatory standards interesting and understand they are essential for healthcare safety.</span>
-            </label>
-            <label class="flex items-center gap-2 p-2 rounded border border-slate-200 hover:bg-slate-50 cursor-pointer">
-              <input type="radio" name="q6" value="research" class="text-blue-600" />
-              <span>I prefer fundamental biology and find heavy regulatory paperwork restrictive to creative science.</span>
+            <label class="flex items-center gap-2 cursor-pointer">
+              <input type="radio" name="q3" value="I" class="text-blue-600" />
+              <span>I prefer spending full workdays on hypothesis-driven discoveries without commercial deadlines. (Investigative)</span>
             </label>
           </div>
         </div>
 
-        <div class="pt-4 border-t border-slate-100 flex justify-end gap-3">
-          <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 rounded-lg text-sm transition shadow-md">
-            Calculate My Pathway Match (/100) &rarr;
+        <!-- Q4: Work Environment Preference -->
+        <div class="p-3 bg-slate-50 rounded-lg border border-slate-200 space-y-2">
+          <p class="font-bold text-slate-800">4. Desired Workplace Setting:</p>
+          <div class="space-y-1.5">
+            <label class="flex items-center gap-2 cursor-pointer">
+              <input type="radio" name="q4" value="ACAD" required class="text-blue-600" />
+              <span>A university research center or national institute preparing for a PhD, publications, and scientific fellowships.</span>
+            </label>
+            <label class="flex items-center gap-2 cursor-pointer">
+              <input type="radio" name="q4" value="IND" class="text-blue-600" />
+              <span>A commercial biopharmaceutical manufacturing or contract research facility with defined corporate career ladders.</span>
+            </label>
+          </div>
+        </div>
+
+        <div class="pt-3 border-t border-slate-100 flex justify-end">
+          <button type="submit" class="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 px-6 rounded-lg text-xs transition shadow-md">
+            Generate Career Fit & Target Matches &rarr;
+          </button>
+        </div>
+
+      </form>
+    </div>
+  </div>
+
+  <!-- POPUP 2: FUNCTIONAL OFFICE HOURS BOOKING & ICS CALENDAR DOWNLOAD -->
+  <div id="bookingModal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-xl shadow-xl max-w-md w-full p-6 space-y-4 border border-slate-200 text-xs">
+      <div class="flex justify-between items-center border-b border-slate-100 pb-2">
+        <h3 class="font-bold text-slate-900 text-base">Schedule Faculty Mentorship</h3>
+        <button onclick="closeBookingModal()" class="text-slate-400 hover:text-slate-600 text-xl font-bold">&times;</button>
+      </div>
+
+      <form onsubmit="handleRealBooking(event)" class="space-y-3">
+        <div>
+          <label class="font-bold text-slate-700 block mb-1">Target Faculty Mentor</label>
+          <select id="bookMentor" class="w-full border border-slate-300 rounded-lg p-2">
+            <option>Dr. Vijay Kumar (Room 304 - Diagnostics / Protein Biology)</option>
+            <option>Dr. A. Sharma (Room 208 - Bioprocess / Fermentation)</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="font-bold text-slate-700 block mb-1">Select Consultation Date</label>
+          <input type="date" id="bookDate" required class="w-full border border-slate-300 rounded-lg p-2" />
+        </div>
+
+        <div>
+          <label class="font-bold text-slate-700 block mb-1">Consultation Time Window</label>
+          <select id="bookTime" class="w-full border border-slate-300 rounded-lg p-2">
+            <option value="14:30">02:30 PM - 02:45 PM (15-min Query Clarification)</option>
+            <option value="15:00">03:00 PM - 03:30 PM (30-min Milestone Sign-off)</option>
+            <option value="15:30">03:30 PM - 04:00 PM (30-min Dissertation Guidance)</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="font-bold text-slate-700 block mb-1">Linked Query or Question ID</label>
+          <input type="text" id="bookQuery" required placeholder="e.g., #Q-8492 (FRAP Kinetics) or SOP Verification" class="w-full border border-slate-300 rounded-lg p-2" />
+        </div>
+
+        <div class="pt-2 flex gap-2">
+          <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 rounded-lg transition shadow-sm">
+            Confirm & Download Calendar Invite (.ics)
           </button>
         </div>
       </form>
     </div>
   </div>
 
-  <!-- BOOKING MODAL -->
-  <div id="bookingModal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-    <div class="bg-white rounded-xl shadow-xl max-w-md w-full p-6 space-y-4 border border-slate-200">
-      <div class="flex justify-between items-center border-b border-slate-100 pb-2">
-        <h3 class="font-bold text-slate-900 text-base">Book Faculty Office Hours</h3>
-        <button onclick="closeBookingModal()" class="text-slate-400 hover:text-slate-600 text-xl font-bold">&times;</button>
-      </div>
-      <form onsubmit="confirmBooking(event)" class="space-y-3 text-xs">
-        <div>
-          <label class="font-bold text-slate-700 block mb-1">Faculty Mentor</label>
-          <select class="w-full border border-slate-300 rounded-lg p-2">
-            <option>Dr. Vijay Kumar (Diagnostics & Protein Research - Room 304)</option>
-            <option>Dr. A. Sharma (Bioprocess & Fermentation - Room 208)</option>
-          </select>
-        </div>
-        <div>
-          <label class="font-bold text-slate-700 block mb-1">Session Type</label>
-          <select class="w-full border border-slate-300 rounded-lg p-2">
-            <option>15-min Doubt Clarification (CSIR/DBT Question)</option>
-            <option>30-min IDP Milestone Sign-off</option>
-            <option>30-min Dissertation Guidance</option>
-          </select>
-        </div>
-        <div>
-          <label class="font-bold text-slate-700 block mb-1">Linked Query or Question ID</label>
-          <input required type="text" placeholder="e.g., #Q-8492 or SOP-ELISA-01" class="w-full border border-slate-300 rounded-lg p-2" />
-        </div>
-        <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 rounded-lg text-xs mt-2 transition">
-          Confirm Consultation Slot
-        </button>
-      </form>
-    </div>
-  </div>
-
   <!-- Footer -->
   <footer class="bg-white border-t border-slate-200 mt-8 py-4 text-center text-xs text-slate-500">
-    Career-Compass • School of Biosciences & Biotechnology
+    Career-Compass • Biosciences Individual Development Plan (IDP) Platform
   </footer>
 
-  <!-- App Script -->
+  <!-- Application Logic -->
   <script>
-    function calculateScores(e) {
+    // Tab Switching
+    function switchTab(tabKey) {
+      const views = { idp: 'viewIDP', csir: 'viewCSIR', industry: 'viewIndustry' };
+      const tabs = { idp: 'tabIDP', csir: 'tabCSIR', industry: 'tabIndustry' };
+
+      Object.keys(views).forEach(k => {
+        document.getElementById(views[k]).classList.add('hidden');
+        document.getElementById(tabs[k]).className = "py-3 px-4 font-semibold text-sm text-slate-500 hover:text-slate-800 transition whitespace-nowrap";
+      });
+
+      document.getElementById(views[tabKey]).classList.remove('hidden');
+      document.getElementById(tabs[tabKey]).className = "py-3 px-4 font-bold text-sm text-blue-600 border-b-2 border-blue-600 transition whitespace-nowrap";
+    }
+
+    // Toggle Unit Details
+    function toggleUnit(unitId) {
+      const el = document.getElementById(unitId);
+      el.classList.toggle('hidden');
+    }
+
+    // Holland Code Diagnostic Calculation
+    function calculateHollandCode(e) {
       e.preventDefault();
       const form = new FormData(document.getElementById("quizForm"));
-      let resCount = 0;
-      let indCount = 0;
+      
+      let iScore = 0; // Investigative
+      let rScore = 0; // Realistic
+      let cScore = 0; // Conventional
+      let aScore = 0; // Artistic
+      let eScore = 0; // Enterprising
+      let isAcad = false;
 
-      for (let val of form.values()) {
-        if (val === "research") resCount++;
-        if (val === "industry") indCount++;
+      for (let [k, v] of form.entries()) {
+        if (v === 'I') iScore += 35;
+        if (v === 'R') rScore += 30;
+        if (v === 'C') cScore += 30;
+        if (v === 'A') aScore += 25;
+        if (v === 'E') eScore += 30;
+        if (v === 'ACAD') isAcad = true;
       }
 
-      const total = resCount + indCount;
-      const researchScore = Math.round((resCount / total) * 100);
-      const industryScore = Math.round((indCount / total) * 100);
+      let resMatch = Math.min(100, Math.max(35, iScore + (isAcad ? 35 : 10)));
+      let indMatch = Math.min(100, Math.max(35, rScore + cScore + (!isAcad ? 35 : 10)));
 
-      document.getElementById("researchScoreDisplay").textContent = `${researchScore}/100`;
-      document.getElementById("industryScoreDisplay").textContent = `${industryScore}/100`;
+      document.getElementById("resScoreText").textContent = resMatch + "/100";
+      document.getElementById("resScoreBar").style.width = resMatch + "%";
 
-      document.getElementById("researchScoreBar").style.width = `${researchScore}%`;
-      document.getElementById("industryScoreBar").style.width = `${industryScore}%`;
+      document.getElementById("indScoreText").textContent = indMatch + "/100";
+      document.getElementById("indScoreBar").style.width = indMatch + "%";
 
-      const recoEl = document.getElementById("recommendationText");
-      if (researchScore > industryScore) {
-        recoEl.innerHTML = `⭐ <strong>Diagnostic Verdict:</strong> Strong inclination for <strong>Academic Research & PhD Track</strong> (${researchScore}/100). We recommend activating the CSIR/DBT Fellowship coaching module.`;
-        switchView('research');
+      if (resMatch >= indMatch) {
+        document.getElementById("archetypePill").textContent = "Profile: Investigative Researcher (IR)";
+        document.getElementById("matchedRoleTitle").textContent = "Molecular Biologist & JRF / PhD Scholar";
+        document.getElementById("archetypeSummary").textContent = "Your profile highlights high analytical inquiry and mechanistic problem-solving. You are primed for CSIR-NET JRF and premier doctoral programs.";
+        document.getElementById("targetInstitutes").textContent = "IISc Bangalore, CSIR-CCMB, NCBS Bangalore, ICGEB New Delhi, NII";
+        document.getElementById("targetCompanies").textContent = "Syngene Discovery R&D, Biocon Research Labs, Reliance Life Sciences R&D";
+        document.getElementById("idpTargetTrack").textContent = "Academic Research & CSIR-NET Fellowship Track";
+        switchTab('csir');
       } else {
-        recoEl.innerHTML = `⭐ <strong>Diagnostic Verdict:</strong> Strong inclination for <strong>Biotech Industry & Placement Track</strong> (${industryScore}/100). We recommend focusing on cGMP, assay validation, and placement skills.`;
-        switchView('industry');
+        document.getElementById("archetypePill").textContent = "Profile: Quality & Process Specialist (CR)";
+        document.getElementById("matchedRoleTitle").textContent = "Bioprocess QC/QA & Bioassay Analyst";
+        document.getElementById("archetypeSummary").textContent = "Your profile exhibits exceptional fidelity to standard operating procedures, documentation integrity, and commercial bio-manufacturing readiness.";
+        document.getElementById("targetInstitutes").textContent = "NIPER Mohali, Institute of Chemical Technology (ICT), IIT Bioprocess Facilities";
+        document.getElementById("targetCompanies").textContent = "Biocon Biologics, Dr. Reddy's Laboratories, Serum Institute, Bharat Biotech";
+        document.getElementById("idpTargetTrack").textContent = "Biotech Industry & Placement Track";
+        switchTab('industry');
       }
 
       closeAssessmentModal();
     }
 
-    function switchView(viewKey) {
-      const vIDP = document.getElementById("viewIDP");
-      const vRes = document.getElementById("viewResearch");
-      const vInd = document.getElementById("viewIndustry");
-
-      const tIDP = document.getElementById("tabIDP");
-      const tRes = document.getElementById("tabResearch");
-      const tInd = document.getElementById("tabIndustry");
-
-      [vIDP, vRes, vInd].forEach(el => el.classList.add("hidden"));
-      [tIDP, tRes, tInd].forEach(el => el.className = "py-3 px-4 font-semibold text-sm text-slate-500 hover:text-slate-800 transition whitespace-nowrap");
-
-      if (viewKey === 'idp') {
-        vIDP.classList.remove("hidden");
-        tIDP.className = "py-3 px-4 font-bold text-sm text-blue-600 border-b-2 border-blue-600 transition whitespace-nowrap";
-      } else if (viewKey === 'research') {
-        vRes.classList.remove("hidden");
-        tRes.className = "py-3 px-4 font-bold text-sm text-blue-600 border-b-2 border-blue-600 transition whitespace-nowrap";
-      } else if (viewKey === 'industry') {
-        vInd.classList.remove("hidden");
-        tInd.className = "py-3 px-4 font-bold text-sm text-blue-600 border-b-2 border-blue-600 transition whitespace-nowrap";
-      }
-    }
-
-    function calcIDP() {
-      const boxes = document.querySelectorAll("#idpMilestoneList input[type='checkbox']");
-      const checked = Array.from(boxes).filter(b => b.checked).length;
-      const pct = Math.round((checked / boxes.length) * 100);
-      document.getElementById("idpCompletionPct").textContent = `${pct}% Complete`;
-      document.getElementById("idpProgressBar").style.width = `${pct}%`;
-    }
-
-    function checkResearchAnswer() {
-      const selected = document.querySelector('input[name="res_mock"]:checked');
-      if (!selected) return alert("Select an option first.");
-      if (selected.value === "A") {
-        alert("Correct! A lack of FRAP recovery indicates that the receptor is tethered to cytoskeletal or extracellular elements.");
-      } else {
-        alert("Incorrect. Increased fluidity would cause faster recovery, whereas Compound W abolished recovery.");
-      }
-    }
-
+    // Modal Controls
     function openAssessmentModal() { document.getElementById("assessmentModal").classList.remove("hidden"); }
     function closeAssessmentModal() { document.getElementById("assessmentModal").classList.add("hidden"); }
-    function openBookingModal() { document.getElementById("bookingModal").classList.remove("hidden"); }
+    function openBookingModal(mentor = '') {
+      if(mentor) document.getElementById("bookMentor").value = mentor;
+      document.getElementById("bookingModal").classList.remove("hidden");
+    }
     function closeBookingModal() { document.getElementById("bookingModal").classList.add("hidden"); }
-    function confirmBooking(e) {
+
+    // Downloadable PDF IDP Dossier
+    function downloadIDPPdf() {
+      const element = document.getElementById('printableIDPArea');
+      const opt = {
+        margin:       0.5,
+        filename:     'Biosciences_Individual_Development_Plan_IDP.pdf',
+        image:        { type: 'jpeg', quality: 0.98 },
+        html2canvas:  { scale: 2 },
+        jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
+      };
+      html2pdf().set(opt).from(element).save();
+    }
+
+    // Downloadable Text Notes Engine
+    function downloadUnitNotes(unit) {
+      let content = "";
+      if (unit === 'Unit1' || unit === 'ALL') {
+        content += "=== CSIR-NET LIFE SCIENCES: UNIT 1 (BIOCHEMISTRY) ===\n" +
+                   "- Ramachandran Plot: Glycine has the highest flexibility; Proline is rigid.\n" +
+                   "- Michaelis-Menten Equation: V = (Vmax * [S]) / (Km + [S]).\n" +
+                   "- Inhibitors: Competitive (Km increases, Vmax constant), Uncompetitive (Both Km & Vmax decrease).\n\n";
+      }
+      if (unit === 'Unit13' || unit === 'ALL') {
+        content += "=== CSIR-NET LIFE SCIENCES: UNIT 13 (METHODS IN BIOLOGY) ===\n" +
+                   "- FRAP (Fluorescence Recovery): Measures lateral diffusion coefficient of membrane proteins.\n" +
+                   "- FRET: Measures energy transfer within 1-10 nm distance.\n" +
+                   "- RT-qPCR: Delta-Delta Ct method for relative gene expression.\n\n";
+      }
+      
+      const blob = new Blob([content], { type: 'text/plain' });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `CSIR_NET_${unit}_Revision_Notes.txt`;
+      a.click();
+      window.URL.revokeObjectURL(url);
+    }
+
+    // Downloadable Cold Email Template
+    function downloadEmailTemplate() {
+      const email = "Subject: Application for Industrial Trainee / Research Internship - [Your Name]\n\n" +
+                    "Dear Dr. [Hiring Manager / Director],\n\n" +
+                    "I am a final-year Master's candidate in Biosciences with hands-on proficiency in BSL-2 cell culture, analytical HPLC, and ELISA protocol development.\n\n" +
+                    "I have followed [Company Name]'s recent advancements in biologics manufacturing, and I would welcome the opportunity to contribute to your QC/Analytical team as an intern.\n\n" +
+                    "Attached please find my ATS-formatted resume for your review.\n\n" +
+                    "Sincerely,\n[Your Name]\n[Contact Info]";
+      const blob = new Blob([email], { type: 'text/plain' });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = "Biotech_Cold_Email_Template.txt";
+      a.click();
+      window.URL.revokeObjectURL(url);
+    }
+
+    // Real .ics Calendar Appointment Generator
+    function handleRealBooking(e) {
       e.preventDefault();
-      alert("Consultation request logged! Your mentor has received your doubt details.");
+      const mentor = document.getElementById("bookMentor").value;
+      const dateVal = document.getElementById("bookDate").value;
+      const timeVal = document.getElementById("bookTime").value;
+      const queryVal = document.getElementById("bookQuery").value;
+
+      if (!dateVal) {
+        alert("Please select a date.");
+        return;
+      }
+
+      // Generate ICS Calendar File
+      const startDate = dateVal.replace(/-/g, '') + 'T' + timeVal.replace(':', '') + '00';
+      const endDate = dateVal.replace(/-/g, '') + 'T' + (parseInt(timeVal.split(':')[0]) + 1) + timeVal.split(':')[1] + '00';
+
+      const icsData = 
+        "BEGIN:VCALENDAR\n" +
+        "VERSION:2.0\n" +
+        "PRODID:-//Career-Compass//Biosciences Mentorship//EN\n" +
+        "BEGIN:VEVENT\n" +
+        `SUMMARY:Mentorship Consultation: ${mentor}\n` +
+        `DESCRIPTION:Discussion Topic: ${queryVal}\n` +
+        `DTSTART:${startDate}\n` +
+        `DTEND:${endDate}\n` +
+        "LOCATION:Department Faculty Cabin\n" +
+        "STATUS:CONFIRMED\n" +
+        "END:VEVENT\n" +
+        "END:VCALENDAR";
+
+      const blob = new Blob([icsData], { type: 'text/calendar' });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `Mentorship_${mentor.split(' ')[1]}_Appointment.ics`;
+      a.click();
+      window.URL.revokeObjectURL(url);
+
+      alert(`Consultation confirmed with ${mentor}! Calendar invite (.ics) has been downloaded.`);
       closeBookingModal();
     }
+
+    function refreshIDP() {
+      const boxes = document.querySelectorAll("#idpChecklist input[type='checkbox']");
+      const checked = Array.from(boxes).filter(b => b.checked).length;
+      const pct = Math.round((checked / boxes.length) * 100);
+      document.getElementById("idpStatusPct").textContent = `${pct}% Complete (${checked}/${boxes.length} Milestones)`;
+    }
+
+    // Default Initialization
+    // Trigger assessment modal on initial load if needed
   </script>
 </body>
 </html>
