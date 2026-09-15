@@ -1,450 +1,66 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Career-Compass | Biosciences Diagnostic & Multi-Track IDP Engine</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-</head>
-<body class="bg-slate-50 text-slate-800 font-sans min-h-screen flex flex-col">
+function saveSelectedPlan() {
+  const selectedPathways = Array.from(document.querySelectorAll('input[name="careerChoice"]:checked')).map(cb => cb.parentElement.innerText.trim());
+  
+  if (selectedPathways.length === 0) {
+    alert("Please select at least one career pathway first.");
+    return;
+  }
 
-  <!-- Header -->
-  <header class="bg-slate-900 text-white shadow sticky top-0 z-30">
-    <div class="max-w-6xl mx-auto px-4 py-3 flex justify-between items-center">
-      <div class="flex items-center gap-2">
-        <span class="text-2xl">🧭</span>
-        <div>
-          <h1 class="text-lg font-bold">Career-Compass</h1>
-          <p class="text-xs text-slate-400">Biosciences 20-Point Diagnostic & Multi-Track Engine</p>
-        </div>
-      </div>
-      <button onclick="openModal()" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded-lg text-xs font-semibold transition">
-        Retake 20-Question Test
-      </button>
-    </div>
-  </header>
+  // Gather chosen skills
+  const selectedSkills = Array.from(document.querySelectorAll('#skillsChecklistContainer input[type="checkbox"]:checked')).map(cb => cb.parentElement.innerText.trim());
+  
+  // Research domain (if applicable)
+  const isResearch = document.querySelector('input[name="careerChoice"][value="research"]').checked;
+  const researchDomain = isResearch ? document.getElementById("researchFieldSelect").selectedOptions[0].text : "N/A";
+  const facultyMentor = isResearch ? document.getElementById("facultyMatchText").innerText : "N/A";
 
-  <!-- Main Content -->
-  <main class="max-w-6xl mx-auto px-4 py-6 space-y-6 flex-1 w-full">
+  const resScore = document.getElementById("resScoreDisplay").innerText;
+  const indScore = document.getElementById("indScoreDisplay").innerText;
 
-    <!-- Diagnostic Score Banner -->
-    <div class="bg-gradient-to-r from-slate-900 via-slate-800 to-indigo-950 text-white rounded-2xl p-6 shadow-md border border-slate-700">
-      <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
-        <div class="space-y-2 max-w-2xl">
-          <span class="bg-blue-500/20 text-blue-300 text-xs font-bold px-2.5 py-1 rounded border border-blue-400/30 uppercase">
-            Diagnostic Assessment Outcome
-          </span>
-          <h2 class="text-2xl font-black text-white" id="assessmentHeadline">Take the 20-Question Diagnostic Test</h2>
-          <p class="text-xs md:text-sm text-slate-300" id="assessmentSummary">
-            Complete the 20-question comprehensive diagnostic test to calculate your affinity scores across scientific research and industrial operations.
-          </p>
-        </div>
+  // 1. Save to Browser Storage
+  const idpPayload = {
+    date: new Date().toLocaleDateString(),
+    researchScore: resScore,
+    industryScore: indScore,
+    pathways: selectedPathways,
+    researchDomain: researchDomain,
+    mentorAdvisory: facultyMentor,
+    skills: selectedSkills
+  };
+  localStorage.setItem("careerCompassIDP", JSON.stringify(idpPayload));
 
-        <div class="flex gap-4 w-full md:w-auto shrink-0">
-          <div class="bg-slate-800/90 border border-slate-700 p-4 rounded-xl text-center w-36">
-            <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">Research Fit</span>
-            <div class="text-3xl font-black text-blue-400 my-1" id="resScoreDisplay">--%</div>
-            <div class="w-full bg-slate-700 rounded-full h-2">
-              <div id="resScoreBar" class="bg-blue-500 h-2 rounded-full transition-all duration-500" style="width: 0%"></div>
-            </div>
-          </div>
-          <div class="bg-slate-800/90 border border-slate-700 p-4 rounded-xl text-center w-36">
-            <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">Industry Fit</span>
-            <div class="text-3xl font-black text-emerald-400 my-1" id="indScoreDisplay">--%</div>
-            <div class="w-full bg-slate-700 rounded-full h-2">
-              <div id="indScoreBar" class="bg-emerald-500 h-2 rounded-full transition-all duration-500" style="width: 0%"></div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+  // 2. Generate and Download Formal IDP Dossier
+  let dossierText = "====================================================\n";
+  dossierText += "       CAREER-COMPASS: INDIVIDUAL DEVELOPMENT PLAN (IDP)\n";
+  dossierText += "       School of Biosciences & Biotechnology\n";
+  dossierText += "====================================================\n\n";
+  dossierText += `Generated Date: ${idpPayload.date}\n`;
+  dossierText += `Diagnostic Fit: Research: ${resScore} | Industry: ${indScore}\n\n`;
+  
+  dossierText += "--- TARGET CAREER PATHWAYS ---\n";
+  selectedPathways.forEach(p => dossierText += `• ${p}\n`);
+  
+  if (isResearch) {
+    dossierText += "\n--- RESEARCH SPECIALIZATION & MENTOR ---\n";
+    dossierText += `Domain: ${researchDomain}\n`;
+    dossierText += `Advisor: ${facultyMentor}\n`;
+  }
+  
+  dossierText += "\n--- SELECTED SKILL MODULES TO DEVELOP ---\n";
+  selectedSkills.forEach(s => dossierText += `[ ] ${s}\n`);
+  
+  dossierText += "\n====================================================\n";
+  dossierText += "Next Steps: Submit this dossier to the Placement Coordinator\n";
+  dossierText += "or bring to Faculty Office Hours for signature.\n";
+  dossierText += "====================================================\n";
 
-    <!-- Multi-Select Career Pathway Selection -->
-    <div class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm space-y-4">
-      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-        <div>
-          <span class="text-xs font-bold text-indigo-600 uppercase tracking-wider">Multi-Track Selection</span>
-          <h3 class="text-xl font-bold text-slate-900 mt-0.5">Choose Your Target Career Pathways</h3>
-          <p class="text-xs text-slate-500">
-            Select one or more tracks that match your aspirations (e.g., Research + Science Communication + Patent/IP).
-          </p>
-        </div>
-        <span id="selectedCountBadge" class="self-start sm:self-auto text-xs bg-blue-100 text-blue-800 font-bold px-3 py-1 rounded-full">
-          1 Track Selected
-        </span>
-      </div>
+  const blob = new Blob([dossierText], { type: "text/plain" });
+  const url = window.URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "My_Career_Compass_IDP.txt";
+  a.click();
+  window.URL.revokeObjectURL(url);
 
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3" id="careerOptionsGrid">
-        
-        <label class="p-4 border-2 border-slate-200 rounded-xl cursor-pointer hover:border-blue-500 transition flex items-start gap-3 bg-slate-50/50 has-[:checked]:border-blue-600 has-[:checked]:bg-blue-50/30">
-          <input type="checkbox" name="careerChoice" value="research" checked onchange="updateSelectedPathways()" class="mt-1 w-4 h-4 text-blue-600 rounded" />
-          <div>
-            <span class="font-bold text-sm text-slate-900 block">🔬 Academic Research & PhD</span>
-            <span class="text-xs text-slate-500">CSIR/DBT/ICMR JRF, doctoral research, mechanistic sciences.</span>
-          </div>
-        </label>
-
-        <label class="p-4 border-2 border-slate-200 rounded-xl cursor-pointer hover:border-blue-500 transition flex items-start gap-3 bg-slate-50/50 has-[:checked]:border-blue-600 has-[:checked]:bg-blue-50/30">
-          <input type="checkbox" name="careerChoice" value="industry" onchange="updateSelectedPathways()" class="mt-1 w-4 h-4 text-blue-600 rounded" />
-          <div>
-            <span class="font-bold text-sm text-slate-900 block">🏭 Biotech & Pharma Industry</span>
-            <span class="text-xs text-slate-500">Bioprocess operations, QA/QC testing, assay development.</span>
-          </div>
-        </label>
-
-        <label class="p-4 border-2 border-slate-200 rounded-xl cursor-pointer hover:border-blue-500 transition flex items-start gap-3 bg-slate-50/50 has-[:checked]:border-blue-600 has-[:checked]:bg-blue-50/30">
-          <input type="checkbox" name="careerChoice" value="patent" onchange="updateSelectedPathways()" class="mt-1 w-4 h-4 text-blue-600 rounded" />
-          <div>
-            <span class="font-bold text-sm text-slate-900 block">⚖️ Patent Examiner & IP Law</span>
-            <span class="text-xs text-slate-500">Patent filing, prior-art search, tech transfer licensing.</span>
-          </div>
-        </label>
-
-        <label class="p-4 border-2 border-slate-200 rounded-xl cursor-pointer hover:border-blue-500 transition flex items-start gap-3 bg-slate-50/50 has-[:checked]:border-blue-600 has-[:checked]:bg-blue-50/30">
-          <input type="checkbox" name="careerChoice" value="comm" onchange="updateSelectedPathways()" class="mt-1 w-4 h-4 text-blue-600 rounded" />
-          <div>
-            <span class="font-bold text-sm text-slate-900 block">✍️ Science Communicator & Medical Writer</span>
-            <span class="text-xs text-slate-500">Scientific journalism, clinical documentation, outreach.</span>
-          </div>
-        </label>
-
-        <label class="p-4 border-2 border-slate-200 rounded-xl cursor-pointer hover:border-blue-500 transition flex items-start gap-3 bg-slate-50/50 has-[:checked]:border-blue-600 has-[:checked]:bg-blue-50/30">
-          <input type="checkbox" name="careerChoice" value="regulatory" onchange="updateSelectedPathways()" class="mt-1 w-4 h-4 text-blue-600 rounded" />
-          <div>
-            <span class="font-bold text-sm text-slate-900 block">📋 Clinical Trials & Regulatory Affairs</span>
-            <span class="text-xs text-slate-500">ICH-GCP compliance, drug approval filings (CDSCO/FDA).</span>
-          </div>
-        </label>
-
-        <label class="p-4 border-2 border-slate-200 rounded-xl cursor-pointer hover:border-blue-500 transition flex items-start gap-3 bg-slate-50/50 has-[:checked]:border-blue-600 has-[:checked]:bg-blue-50/30">
-          <input type="checkbox" name="careerChoice" value="startup" onchange="updateSelectedPathways()" class="mt-1 w-4 h-4 text-blue-600 rounded" />
-          <div>
-            <span class="font-bold text-sm text-slate-900 block">💡 Bio-Entrepreneurship & Startups</span>
-            <span class="text-xs text-slate-500">Translational biology, biotech incubators (BIRAC), bio-business.</span>
-          </div>
-        </label>
-      </div>
-    </div>
-
-    <!-- Aggregated Skills Support Module -->
-    <div id="skillsSupportCard" class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm space-y-6">
-      <div class="border-b border-slate-100 pb-3">
-        <span class="text-xs font-bold text-indigo-600 uppercase tracking-wider">Skill Customization</span>
-        <h3 class="text-xl font-bold text-slate-900 mt-1">What Specific Skills Do You Need Support In?</h3>
-        <p class="text-xs text-slate-500">The checklist below automatically combines modules based on all your selected career tracks.</p>
-      </div>
-
-      <!-- Specific Research Domain Selector (Shown when Academic Research is selected) -->
-      <div id="researchDomainBox" class="p-4 bg-blue-50/60 rounded-xl border border-blue-100 space-y-3">
-        <label class="block text-xs font-bold text-blue-900 uppercase">Primary Scientific Research Specialization:</label>
-        <select id="researchFieldSelect" onchange="updateFacultySuggestion()" class="w-full border border-blue-200 rounded-lg p-2.5 text-xs md:text-sm bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none">
-          <option value="neuro">Biomolecular Assays, Tau Protein, Diagnostics & Neurobiology</option>
-          <option value="bioprocess">Microbial Fermentation & Bioprocess Engineering</option>
-          <option value="cancer">Cancer Biology, Immunology & Cell Signalling</option>
-          <option value="plant">Plant Biotechnology & Stress Physiology</option>
-          <option value="bioinfo">Computational Biology, Structural Bioinformatics & Genomics</option>
-        </select>
-        
-        <div class="mt-2 p-3 bg-white rounded-lg border border-blue-200 text-xs text-slate-700">
-          <strong class="text-blue-900 block mb-1">Recommended Departmental Mentor:</strong>
-          <span id="facultyMatchText">Dr. Vijay Kumar (Room 304) — Specialization: Biomolecular Assays, Tau Protein Aggregation & Diagnostics.</span>
-        </div>
-      </div>
-
-      <!-- Aggregated Dynamic Skill Checkboxes -->
-      <div class="space-y-4" id="skillsChecklistContainer"></div>
-
-      <button onclick="saveSelectedPlan()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 px-6 rounded-lg text-xs transition shadow-sm">
-        Save & Finalize My Individual Development Plan (IDP)
-      </button>
-    </div>
-
-    <!-- Contact Cards: Placement Coordinator & Research Committee -->
-    <div class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm space-y-4">
-      <div class="border-b border-slate-100 pb-3">
-        <h3 class="text-base font-bold text-slate-900">Departmental Contact & Placement Cell</h3>
-        <p class="text-xs text-slate-500">Get in touch for corporate placement training, IP guidance, or research advisor assignments.</p>
-      </div>
-
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
-        <div class="p-4 bg-slate-50 rounded-xl border border-slate-200 space-y-2">
-          <div class="flex items-center gap-2">
-            <span class="text-xl">💼</span>
-            <span class="font-bold text-slate-900 text-sm">Placement Coordinator Office</span>
-          </div>
-          <p class="text-slate-600">Contact for corporate placement drives, resume audits, mock interviews, and industrial internships.</p>
-          <div class="pt-2 text-slate-700 space-y-1">
-            <p><strong>Office:</strong> Biosciences Placement & Corporate Relations Cell</p>
-            <p><strong>Support:</strong> CV Audits, Mock Interviews & Industry/IP Connect</p>
-          </div>
-          <button onclick="alert('Please contact your Departmental Placement Coordinator desk or email the corporate placement cell.')" class="mt-2 text-xs bg-slate-900 hover:bg-slate-800 text-white font-semibold py-1.5 px-3 rounded transition">
-            Contact Placement Coordinator
-          </button>
-        </div>
-
-        <div class="p-4 bg-slate-50 rounded-xl border border-slate-200 space-y-2">
-          <div class="flex items-center gap-2">
-            <span class="text-xl">🔬</span>
-            <span class="font-bold text-slate-900 text-sm">Research Mentorship Committee</span>
-          </div>
-          <p class="text-slate-600">Contact to align your dissertation proposal, fellowship exam applications (CSIR/DBT), or lab allocations.</p>
-          <div class="pt-2 text-slate-700 space-y-1">
-            <p><strong>Office:</strong> School of Biosciences Research Committee</p>
-            <p><strong>Advisory:</strong> Faculty Lab Matching & JRF Proposal Reviews</p>
-          </div>
-          <button onclick="alert('Faculty Mentorship Office: Reach out during departmental office hours for laboratory guidance.')" class="mt-2 text-xs bg-blue-600 hover:bg-blue-700 text-white font-semibold py-1.5 px-3 rounded transition">
-            Connect with Research Committee
-          </button>
-        </div>
-      </div>
-    </div>
-
-  </main>
-
-  <!-- 20-QUESTION DIAGNOSTIC MODAL -->
-  <div id="quizModal" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-    <div class="bg-white rounded-2xl shadow-2xl max-w-3xl w-full p-6 md:p-8 space-y-5 max-h-[90vh] overflow-y-auto border border-slate-200">
-      <div class="border-b border-slate-100 pb-3">
-        <span class="text-xs font-bold text-indigo-600 uppercase tracking-wider">Comprehensive 20-Question Diagnostic</span>
-        <h3 class="text-xl font-black text-slate-900 mt-1">Biosciences Career Aptitude Test</h3>
-        <p class="text-xs text-slate-500">Evaluates Reasoning, Innovative Problem-Solving, Scientific Rigor, and Industrial Quality Focus.</p>
-      </div>
-
-      <form id="twentyQuestionForm" onsubmit="evaluate20Quiz(event)" class="space-y-4 text-xs">
-        <div id="quizContainer" class="space-y-4"></div>
-        <div class="pt-4 border-t border-slate-100 flex justify-end">
-          <button type="submit" class="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 px-6 rounded-lg text-xs transition shadow-md">
-            Calculate Match Scores (/100) &rarr;
-          </button>
-        </div>
-      </form>
-    </div>
-  </div>
-
-  <footer class="bg-white border-t border-slate-200 py-4 text-center text-xs text-slate-500">
-    Career-Compass • School of Biosciences Platform
-  </footer>
-
-  <script>
-    const questionsBank = [
-      { id: 1, cat: 'res', text: "When an experiment fails to produce expected bands, your natural instinct is to:", a: "Hypothesize unconsidered molecular mechanisms or thermodynamic factors", b: "Audit reagents, pipette calibration, and verified SOP protocol logs" },
-      { id: 2, cat: 'ind', text: "You are given a complex multi-step protocol. You prioritize:", a: "Optimizing steps to finish on schedule with zero protocol deviation", b: "Questioning the mechanism behind each buffer component to see if it can be re-engineered" },
-      { id: 3, cat: 'res', text: "When interpreting contradictory experimental data:", a: "You enjoy digging through obscure research papers to reconcile anomalies", b: "You flag it as an Out-of-Specification (OOS) event and repeat under controlled standards" },
-      { id: 4, cat: 'ind', text: "In a testing workflow, what gives you greater satisfaction?", a: "High-throughput, clean documentation, and reliable repeatability", b: "Discovering an unexpected biological side-reaction that opens new questions" },
-      { id: 5, cat: 'res', text: "When facing a quantitative math problem in the lab (dilutions, kinetics):", a: "You prefer deriving the equations and understanding rate constants mathematically", b: "You prefer using validated standard calculation tables or automated templates" },
-      { id: 6, cat: 'res', text: "Designing a research project, you prefer tackling:", a: "High-risk, fundamental, uncharted questions with potential for novel publication", b: "Proven methods that solve a defined commercial manufacturing bottleneck" },
-      { id: 7, cat: 'ind', text: "How do you view standard operating procedures (SOPs)?", a: "Essential safeguards that must never be altered without strict regulatory change-control", b: "Guidelines that should be modified iteratively whenever new ideas arise" },
-      { id: 8, cat: 'res', text: "Your perspective on unexpected side-products in a culture flask:", a: "Exciting serendipity that could be a new secondary metabolite discovery", b: "A batch contamination error requiring immediate root-cause analysis" },
-      { id: 9, cat: 'ind', text: "Innovation to you primarily means:", a: "Process engineering: making existing therapeutics cheaper, safer, and higher yield", b: "Conceptual breakthrough: elucidating a novel disease pathway" },
-      { id: 10, cat: 'res', text: "If given free lab budget for 3 months, you would:", a: "Explore an unproven hypothesis testing speculative biological targets", b: "Validate an assay according to ICH Q2(R1) guidelines for commercial readiness" },
-      { id: 11, cat: 'res', text: "When studying enzymes and biochemical kinetics, you are most drawn to:", a: "Allosteric transitions, transition states, and molecular docking mechanisms", b: "Enzyme stability in large-scale fermenters and shelf-life formulation" },
-      { id: 12, cat: 'res', text: "When reading scientific literature, you focus most closely on:", a: "The experimental design controls, limitations, and mechanistic model figures", b: "The patents cited, target market size, and commercial scalability" },
-      { id: 13, cat: 'ind', text: "Your interest in regulatory bodies (CDSCO, US FDA, EMA):", a: "I appreciate understanding drug approval dossiers and clinical trial safety gates", b: "I find regulatory paperwork secondary to pure bench exploration" },
-      { id: 14, cat: 'res', text: "You prefer spending weeks troubleshooting:", a: "Why a specific protein aggregation pathway changes at pH 6.8 vs 7.2", b: "Why a 500-liter bioreactor dissolved oxygen sensor drifted during production" },
-      { id: 15, cat: 'res', text: "Writing scientific documents, you prefer:", a: "Research manuscripts with literature citations and theoretical models", b: "Validation protocols, Batch Manufacturing Records (BMR), and audit checklists" },
-      { id: 16, cat: 'ind', text: "A batch production run is finished. Your preferred priority is:", a: "Reviewing quality control metrics, purity curves, and signing off the release log", b: "Taking aliquots to test unrelated scientific ideas in the lab" },
-      { id: 17, cat: 'ind', text: "Working with high-value analytical instruments (HPLC, Mass Spec):", a: "I enjoy routine calibration, system suitability checks, and reproducible peaks", b: "I enjoy customizing laser settings or physical modifications for novel assays" },
-      { id: 18, cat: 'ind', text: "Your comfort with deadline-driven corporate deliverables:", a: "High: I thrive in structured corporate timelines with explicit deliverables", b: "Moderate: I prefer working until the scientific mechanism is fully elucidated" },
-      { id: 19, cat: 'ind', text: "In an audit environment:", a: "I take pride in zero documentation defects and clean traceability", b: "I find documentation auditing tedious compared to wet-lab experimentation" },
-      { id: 20, cat: 'ind', text: "Your ultimate 5-year career satisfaction:", a: "Seeing a pharmaceutical or diagnostic product manufactured and reaching patients", b: "Securing competitive grants, high-impact papers, and leading a research lab" }
-    ];
-
-    // Modules definition mapped to tracks
-    const trackModules = {
-      research: {
-        title: "🔬 Academic Research & PhD Modules",
-        skills: [
-          { text: "CSIR-NET / DBT-BET / ICMR-JRF Coaching & Strategy: High-yield unit breakdown & Part-C problem drills", checked: true },
-          { text: "Project Proposal & Grant Writing: Formulating hypotheses, specific aims, and experimental controls", checked: true },
-          { text: "Academic CV & SOP Preparation: Drafting statements of purpose for premier PhD programs", checked: true },
-          { text: "Literature Review & Reference Management: Systematic searches (PubMed/Scopus) & Zotero workflows", checked: false }
-        ]
-      },
-      industry: {
-        title: "🏭 Biotech & Pharma Industry Modules",
-        skills: [
-          { text: "Industry Resume & ATS Optimization: Framing wet-lab skills as measurable quantitative outcomes", checked: true },
-          { text: "Work Ethics & Corporate Readiness: Reporting hierarchies, email etiquette, and accountability", checked: true },
-          { text: "Mock Technical & HR Interviews: STAR technique for QC/Bioprocess problem-solving rounds", checked: true },
-          { text: "GLP/GMP & Regulatory Audit Standards: SOP writing, out-of-specification (OOS), and batch records", checked: false },
-          { text: "Group Discussion (GD) Preparation: Debating biopharma policies and biosimilar pipelines", checked: false }
-        ]
-      },
-      patent: {
-        title: "⚖️ Patent & Intellectual Property Modules",
-        skills: [
-          { text: "Patent Law Fundamentals: Prior-art patent search (Google Patents, Espacenet) & patentability criteria", checked: true },
-          { text: "Patent Claims & Specification Drafting: Translating lab discoveries into enforceable legal claims", checked: true },
-          { text: "Indian Patent Agent Examination (Paper 1 & 2) Preparation & Patent Office Practice", checked: false }
-        ]
-      },
-      comm: {
-        title: "✍️ Science Communication & Medical Writing Modules",
-        skills: [
-          { text: "Medical & Regulatory Writing: Preparing clinical study reports, investigator brochures, and safety narratives", checked: true },
-          { text: "Public Science Journalism: Translating high-impact bioscience research papers into accessible media articles", checked: true },
-          { text: "Scientific Visuals & Infographic Design: Communicating biochemical pathways via BioRender & Adobe Illustrator", checked: false }
-        ]
-      },
-      regulatory: {
-        title: "📋 Clinical Trials & Regulatory Affairs Modules",
-        skills: [
-          { text: "Good Clinical Practice (ICH-GCP) & Ethical Committee Guidelines for Human Trials", checked: true },
-          { text: "Regulatory Dossier Preparation: Common Technical Document (CTD) formats for CDSCO & US FDA submissions", checked: true },
-          { text: "Pharmacovigilance Basics: Adverse drug reaction reporting and periodic safety update reports (PSUR)", checked: false }
-        ]
-      },
-      startup: {
-        title: "💡 Bio-Entrepreneurship & Startup Modules",
-        skills: [
-          { text: "Translational Feasibility Analysis: Technology Readiness Levels (TRL 1 to TRL 9) in Biotechnology", checked: true },
-          { text: "Grant Applications for Bio-Incubators (BIRAC BIG, SBIRI & Seed Funding Strategy)", checked: true },
-          { text: "Bio-Business Model Canvas: Regulatory roadmaps, unit economics, and venture pitching", checked: false }
-        ]
-      }
-    };
-
-    function buildQuiz() {
-      const container = document.getElementById("quizContainer");
-      container.innerHTML = questionsBank.map((q, idx) => `
-        <div class="p-3 bg-slate-50 rounded-xl border border-slate-200 space-y-2">
-          <p class="font-bold text-slate-800 text-xs">${idx + 1}. ${q.text}</p>
-          <div class="space-y-1.5 text-xs">
-            <label class="flex items-center gap-2 p-2 bg-white rounded border border-slate-200 hover:bg-blue-50 cursor-pointer">
-              <input type="radio" name="q_${q.id}" value="${q.cat === 'res' ? 'res' : 'ind'}" required class="text-blue-600" />
-              <span>${q.a}</span>
-            </label>
-            <label class="flex items-center gap-2 p-2 bg-white rounded border border-slate-200 hover:bg-blue-50 cursor-pointer">
-              <input type="radio" name="q_${q.id}" value="${q.cat === 'res' ? 'ind' : 'res'}" required class="text-blue-600" />
-              <span>${q.b}</span>
-            </label>
-          </div>
-        </div>
-      `).join('');
-    }
-
-    function evaluate20Quiz(e) {
-      e.preventDefault();
-      const form = new FormData(document.getElementById("twentyQuestionForm"));
-      let resCount = 0;
-      let indCount = 0;
-
-      for (let [k, v] of form.entries()) {
-        if (v === 'res') resCount++;
-        if (v === 'ind') indCount++;
-      }
-
-      const total = resCount + indCount; // 20
-      const resPct = Math.round((resCount / total) * 100);
-      const indPct = Math.round((indCount / total) * 100);
-
-      document.getElementById("resScoreDisplay").textContent = resPct + "%";
-      document.getElementById("indScoreDisplay").textContent = indPct + "%";
-      document.getElementById("resScoreBar").style.width = resPct + "%";
-      document.getElementById("indScoreBar").style.width = indPct + "%";
-
-      const headline = document.getElementById("assessmentHeadline");
-      const summary = document.getElementById("assessmentSummary");
-
-      if (resPct > indPct) {
-        headline.textContent = `Diagnostic Recommendation: Research & Specialized Tracks (${resPct}% Fit)`;
-        summary.innerHTML = `Your profile shows strength in hypothesis generation, mechanistic reasoning, and fundamental inquiry. Choose any combination of career pathways below to customize your plan.`;
-      } else if (indPct > resPct) {
-        headline.textContent = `Diagnostic Recommendation: Industry & Regulatory Tracks (${indPct}% Fit)`;
-        summary.innerHTML = `Your profile shows strong aptitude for process discipline, quality standards, and industry compliance. Choose any combination of career pathways below to customize your plan.`;
-      } else {
-        headline.textContent = `Diagnostic Recommendation: Versatile Profile (50% Research / 50% Industry)`;
-        summary.innerHTML = `You possess an equal balance between experimental curiosity and operational discipline. You have the versatility to select multiple complementary pathways.`;
-      }
-
-      closeModal();
-    }
-
-    // Dynamic Multi-Select Aggregator
-    function updateSelectedPathways() {
-      const selectedBoxes = Array.from(document.querySelectorAll('input[name="careerChoice"]:checked'));
-      const count = selectedBoxes.length;
-
-      document.getElementById("selectedCountBadge").textContent = 
-        count === 1 ? "1 Track Selected" : `${count} Tracks Selected`;
-
-      const domainBox = document.getElementById("researchDomainBox");
-      const isResearchSelected = selectedBoxes.some(cb => cb.value === 'research');
-      
-      // Toggle Research Specialization box if research is checked
-      if (isResearchSelected) {
-        domainBox.classList.remove("hidden");
-        updateFacultySuggestion();
-      } else {
-        domainBox.classList.add("hidden");
-      }
-
-      const container = document.getElementById("skillsChecklistContainer");
-      
-      if (count === 0) {
-        container.innerHTML = `<p class="text-xs text-amber-600 font-semibold p-3 bg-amber-50 rounded-lg border border-amber-200">Please select at least one career pathway above to populate your skill modules.</p>`;
-        return;
-      }
-
-      // Build aggregated checklist grouped by track
-      let html = "";
-      selectedBoxes.forEach(cb => {
-        const mod = trackModules[cb.value];
-        if (mod) {
-          html += `
-            <div class="p-4 bg-slate-50 rounded-xl border border-slate-200 space-y-2.5">
-              <h4 class="text-xs font-bold text-slate-900 uppercase tracking-wide flex items-center justify-between">
-                <span>${mod.title}</span>
-                <span class="text-[10px] text-blue-600 bg-blue-50 px-2 py-0.5 rounded font-semibold">Active Track</span>
-              </h4>
-              <div class="space-y-2">
-                ${mod.skills.map(s => `
-                  <label class="flex items-start gap-3 p-2.5 bg-white rounded-lg border border-slate-200 text-xs cursor-pointer hover:bg-blue-50/40 transition">
-                    <input type="checkbox" ${s.checked ? 'checked' : ''} class="mt-0.5 w-4 h-4 text-blue-600 rounded" />
-                    <span class="text-slate-700 font-medium">${s.text}</span>
-                  </label>
-                `).join('')}
-              </div>
-            </div>
-          `;
-        }
-      });
-
-      container.innerHTML = html;
-    }
-
-    function updateFacultySuggestion() {
-      const val = document.getElementById("researchFieldSelect").value;
-      const text = document.getElementById("facultyMatchText");
-
-      if (val === 'neuro') {
-        text.innerHTML = "<strong>Dr. Vijay Kumar (Room 304)</strong> — <em>Specialization: Biomolecular Assays, Tau Protein Aggregation & Diagnostics</em>.";
-      } else if (val === 'bioprocess') {
-        text.innerHTML = "<strong>School Biosciences Bioprocess Faculty</strong> — <em>Specialization: Microbial Fermentation & Scale-up</em>.";
-      } else if (val === 'cancer') {
-        text.innerHTML = "<strong>Molecular Oncology Faculty</strong> — <em>Specialization: Cell Signalling & Apoptosis</em>.";
-      } else if (val === 'plant') {
-        text.innerHTML = "<strong>Plant Biotechnology Faculty</strong> — <em>Specialization: Abiotic Stress & Plant Physiology</em>.";
-      } else {
-        text.innerHTML = "<strong>Computational Biology Faculty</strong> — <em>Specialization: Structural Modeling & Genomics</em>.";
-      }
-    }
-
-    function saveSelectedPlan() {
-      const selected = Array.from(document.querySelectorAll('input[name="careerChoice"]:checked')).map(cb => cb.value);
-      if(selected.length === 0) {
-        alert("Please select at least one pathway first.");
-        return;
-      }
-      alert(`Success! Your Individual Development Plan (IDP) with ${selected.length} combined pathways has been recorded. Share your plan with the Placement Cell or Faculty Committee.`);
-    }
-
-    function openModal() { document.getElementById("quizModal").classList.remove("hidden"); }
-    function closeModal() { document.getElementById("quizModal").classList.add("hidden"); }
-
-    // Init
-    buildQuiz();
-    updateSelectedPathways();
-  </script>
-</body>
-</html>
+  alert(`Your Individual Development Plan has been saved in your browser and downloaded as 'My_Career_Compass_IDP.txt'.\n\nYou can share this directly with the Placement Coordinator or Research Committee.`);
+}
