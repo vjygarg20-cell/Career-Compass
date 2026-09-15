@@ -1,1 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Biosciences Career & IDP Portal</title>
+  <!-- Tailwind CSS CDN for instant styling -->
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans">
 
+  <!-- Navigation Bar -->
+  <header class="bg-slate-900 text-white shadow">
+    <div class="max-w-6xl mx-auto px-4 py-4 flex justify-between items-center">
+      <h1 class="text-xl font-bold tracking-tight">Biosciences Career & IDP Portal</h1>
+      <button onclick="openModal()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition">
+        Book Faculty Slot
+      </button>
+    </div>
+  </header>
+
+  <main class="max-w-6xl mx-auto px-4 py-8 space-y-6">
+
+    <!-- Profile & Progress Card -->
+    <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+      <div>
+        <h2 class="text-2xl font-bold text-slate-900">Student Dashboard</h2>
+        <p class="text-slate-500 text-sm">Program: MSc Biosciences • Cohort 2026</p>
+      </div>
+      <div class="w-full md:w-1/3">
+        <div class="flex justify-between text-xs font-semibold mb-1">
+          <span>Overall Readiness</span>
+          <span>65%</span>
+        </div>
+        <div class="w-full bg-slate-200 rounded-full h-3">
+          <div class="bg-blue-600 h-3 rounded-full" style="width: 65%"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Track Selector Tabs -->
+    <div class="flex gap-4 border-b border-slate-200">
+      <button id="phdBtn" onclick="switchTrack('phd')" class="py-3 px-4 font-semibold text-blue-600 border-b-2 border-blue-600 transition">
+        🔬 PhD & Research Track (CSIR/DBT)
+      </button>
+      <button id="industryBtn" onclick="switchTrack('industry')" class="py-3 px-4 font-semibold text-slate-500 hover:text-slate-700 transition">
+        🏭 Biotech Industry Track
+      </button>
+    </div>
+
+    <!-- Dynamic Content Area -->
+    <div id="trackContent" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      
+      <!-- Card 1: Milestones Checklist -->
+      <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+        <h3 class="text-lg font-bold mb-4 flex items-center gap-2">
+          <span>📋</span> Active Semester Milestones
+        </h3>
+        <div class="space-y-3" id="milestoneList">
+          <!-- Populated by JavaScript -->
+        </div>
+      </div>
+
+      <!-- Card 2: Practice & Study Module -->
+      <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+        <h3 class="text-lg font-bold mb-4 flex items-center gap-2">
+          <span id="moduleIcon">📚</span> <span id="moduleTitle">CSIR-NET High-Yield Practice</span>
+        </h3>
+        <div id="moduleContent" class="space-y-4">
+          <!-- Populated by JavaScript -->
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- Faculty Booking Modal (Popup) -->
+  <div id="bookingModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-xl shadow-lg max-w-md w-full p-6 space-y-4">
+      <div class="flex justify-between items-center">
+        <h3 class="text-lg font-bold text-slate-900">Book Faculty Office Hours</h3>
+        <button onclick="closeModal()" class="text-slate-400 hover:text-slate-600 text-xl font-bold">&times;</button>
+      </div>
+      
+      <form onsubmit="handleBooking(event)" class="space-y-3">
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Select Mentor</label>
+          <select class="w-full border border-slate-300 rounded-lg p-2 text-sm">
+            <option>Dr. V. Kumar (Room 304 - Diagnostics / Protein Biology)</option>
+            <option>Dr. A. Sharma (Room 208 - Bioprocess / Fermentation)</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Session Type</label>
+          <select class="w-full border border-slate-300 rounded-lg p-2 text-sm">
+            <option>15-min Question Clarification</option>
+            <option>30-min IDP Milestone Verification</option>
+            <option>30-min Thesis / SOP Guidance</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Doubt / Question Details</label>
+          <textarea required placeholder="Enter Question ID (e.g., #Q-8492) or summary of query..." class="w-full border border-slate-300 rounded-lg p-2 text-sm h-24"></textarea>
+        </div>
+
+        <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 rounded-lg text-sm transition">
+          Confirm Appointment
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Interactive Logic -->
+  <script>
+    const trackData = {
+      phd: {
+        milestones: [
+          "Complete Unit 13 (Methods in Bio) Practice Drills",
+          "Hypothesis & Specific Aims 1-Page Draft",
+          "BSL-2 Aseptic Handling Faculty Sign-off",
+          "Target PhD Labs & PI Mapping"
+        ],
+        title: "CSIR-NET Question of the Week",
+        icon: "🔬",
+        html: `
+          <div class="p-4 bg-slate-50 rounded-lg border border-slate-200">
+            <p class="font-semibold text-sm mb-2 text-slate-900">#Q-8492: FRAP Kinetics & Membrane Mobility</p>
+            <p class="text-xs text-slate-600 mb-3">Compound W prevents 90% fluorescence recovery after bleaching Receptor-X. What does this deduce?</p>
+            <div class="space-y-1 text-xs">
+              <label class="block p-2 bg-white rounded border border-slate-200 hover:bg-blue-50 cursor-pointer">
+                <input type="radio" name="q" /> A) Receptor-X is tethered to the cytoskeleton
+              </label>
+              <label class="block p-2 bg-white rounded border border-slate-200 hover:bg-blue-50 cursor-pointer">
+                <input type="radio" name="q" /> B) Membrane fluidity has dramatically increased
+              </label>
+            </div>
+          </div>
+          <button onclick="alert('Option A is correct: Lack of FRAP recovery indicates molecular immobilization/tethering.')" class="w-full text-xs font-semibold text-blue-600 border border-blue-600 rounded py-2 hover:bg-blue-50">
+            Verify Answer
+          </button>
+        `
+      },
+      industry: {
+        milestones: [
+          "Standard Operating Procedure (SOP) Drafting for ELISA",
+          "Good Laboratory Practice (GLP) Audit Readiness",
+          "ATS-Optimized Biotechnology Resume Draft",
+          "Mock Technical Interview (QC / Bioprocess)"
+        ],
+        title: "Industry Placement & Soft Skills",
+        icon: "🏭",
+        html: `
+          <div class="space-y-3">
+            <div class="p-3 bg-blue-50 rounded-lg text-xs text-blue-900">
+              <strong>Tip:</strong> Translate research into impact. Replace <em>"Did Western blots"</em> with <em>"Validated assay sensitivity with <5% CV"</em>.
+            </div>
+            <ul class="text-xs space-y-2 text-slate-700">
+              <li>📄 <strong>Resume Builder:</strong> Download CDSCO/FDA aligned template.</li>
+              <li>🎤 <strong>Group Discussion:</strong> Biosimilars vs Innovator biologics.</li>
+              <li>💼 <strong>Cold Email:</strong> Template for CRO/CDMO outreach.</li>
+            </ul>
+          </div>
+        `
+      }
+    };
+
+    function renderTrack(trackKey) {
+      const data = trackData[trackKey];
+      
+      // Render Milestones
+      const listEl = document.getElementById("milestoneList");
+      listEl.innerHTML = data.milestones.map(m => `
+        <label class="flex items-center gap-3 p-3 bg-slate-50 rounded-lg border border-slate-200 text-sm cursor-pointer hover:bg-slate-100">
+          <input type="checkbox" class="w-4 h-4 text-blue-600 rounded" />
+          <span>${m}</span>
+        </label>
+      `).join('');
+
+      // Render Module
+      document.getElementById("moduleIcon").textContent = data.icon;
+      document.getElementById("moduleTitle").textContent = data.title;
+      document.getElementById("moduleContent").innerHTML = data.html;
+    }
+
+    function switchTrack(track) {
+      const phdBtn = document.getElementById("phdBtn");
+      const indBtn = document.getElementById("industryBtn");
+      
+      if(track === 'phd') {
+        phdBtn.className = "py-3 px-4 font-semibold text-blue-600 border-b-2 border-blue-600 transition";
+        indBtn.className = "py-3 px-4 font-semibold text-slate-500 hover:text-slate-700 transition";
+      } else {
+        indBtn.className = "py-3 px-4 font-semibold text-blue-600 border-b-2 border-blue-600 transition";
+        phdBtn.className = "py-3 px-4 font-semibold text-slate-500 hover:text-slate-700 transition";
+      }
+      renderTrack(track);
+    }
+
+    function openModal() { document.getElementById("bookingModal").classList.remove("hidden"); }
+    function closeModal() { document.getElementById("bookingModal").classList.add("hidden"); }
+    function handleBooking(e) {
+      e.preventDefault();
+      alert("Consultation request logged! Your mentor has been notified.");
+      closeModal();
+    }
+
+    // Initial render
+    renderTrack('phd');
+  </script>
+</body>
+</html>
