@@ -3,211 +3,466 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Biosciences Career & IDP Portal</title>
+  <title>Career-Compass | Biosciences IDP & Career Diagnostic</title>
   <!-- Tailwind CSS CDN for instant styling -->
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-slate-50 text-slate-800 font-sans">
+<body class="bg-slate-50 text-slate-800 font-sans min-h-screen flex flex-col">
 
   <!-- Navigation Bar -->
-  <header class="bg-slate-900 text-white shadow">
-    <div class="max-w-6xl mx-auto px-4 py-4 flex justify-between items-center">
-      <h1 class="text-xl font-bold tracking-tight">Biosciences Career & IDP Portal</h1>
-      <button onclick="openModal()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition">
-        Book Faculty Slot
-      </button>
+  <header class="bg-slate-900 text-white shadow sticky top-0 z-30">
+    <div class="max-w-6xl mx-auto px-4 py-3 flex justify-between items-center">
+      <div class="flex items-center gap-3">
+        <span class="text-2xl">🧭</span>
+        <div>
+          <h1 class="text-lg font-bold tracking-tight leading-tight">Career-Compass</h1>
+          <p class="text-xs text-slate-400">Biosciences Aptitude Diagnostic & IDP Platform</p>
+        </div>
+      </div>
+      <div class="flex items-center gap-2">
+        <button onclick="openAssessmentModal()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1.5 rounded-lg text-xs font-semibold transition">
+          Retake Diagnostic Test
+        </button>
+        <button onclick="openBookingModal()" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded-lg text-xs font-semibold transition">
+          Book Faculty Slot
+        </button>
+      </div>
     </div>
   </header>
 
-  <main class="max-w-6xl mx-auto px-4 py-8 space-y-6">
+  <!-- Main Container -->
+  <main class="max-w-6xl mx-auto px-4 py-6 space-y-6 flex-1 w-full">
 
-    <!-- Profile & Progress Card -->
-    <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-      <div>
-        <h2 class="text-2xl font-bold text-slate-900">Student Dashboard</h2>
-        <p class="text-slate-500 text-sm">Program: MSc Biosciences • Cohort 2026</p>
-      </div>
-      <div class="w-full md:w-1/3">
-        <div class="flex justify-between text-xs font-semibold mb-1">
-          <span>Overall Readiness</span>
-          <span>65%</span>
+    <!-- Diagnostic Score Banner (Dynamic Results) -->
+    <div id="scoreBanner" class="bg-gradient-to-r from-slate-900 to-slate-800 text-white rounded-xl p-6 shadow-md">
+      <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+        <div>
+          <span class="bg-blue-500/20 text-blue-300 text-xs font-bold px-2.5 py-1 rounded border border-blue-400/30 uppercase tracking-wider">Aptitude & Interest Diagnostic</span>
+          <h2 class="text-2xl font-extrabold mt-2 text-white">Your Pathway Readiness Scores</h2>
+          <p class="text-slate-300 text-xs mt-1" id="recommendationText">Complete the diagnostic test to calculate your Research and Industry match scores.</p>
         </div>
-        <div class="w-full bg-slate-200 rounded-full h-3">
-          <div class="bg-blue-600 h-3 rounded-full" style="width: 65%"></div>
+
+        <div class="flex flex-col sm:flex-row gap-4 w-full md:w-auto">
+          <!-- Research Score Gauge -->
+          <div class="bg-slate-800/80 border border-slate-700 p-4 rounded-lg w-full sm:w-48 text-center">
+            <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Research / PhD Match</span>
+            <div class="text-3xl font-black text-blue-400 my-1" id="researchScoreDisplay">--/100</div>
+            <div class="w-full bg-slate-700 rounded-full h-2">
+              <div id="researchScoreBar" class="bg-blue-500 h-2 rounded-full transition-all duration-500" style="width: 0%"></div>
+            </div>
+          </div>
+
+          <!-- Industry Score Gauge -->
+          <div class="bg-slate-800/80 border border-slate-700 p-4 rounded-lg w-full sm:w-48 text-center">
+            <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Biotech Industry Match</span>
+            <div class="text-3xl font-black text-emerald-400 my-1" id="industryScoreDisplay">--/100</div>
+            <div class="w-full bg-slate-700 rounded-full h-2">
+              <div id="industryScoreBar" class="bg-emerald-500 h-2 rounded-full transition-all duration-500" style="width: 0%"></div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
 
-    <!-- Track Selector Tabs -->
-    <div class="flex gap-4 border-b border-slate-200">
-      <button id="phdBtn" onclick="switchTrack('phd')" class="py-3 px-4 font-semibold text-blue-600 border-b-2 border-blue-600 transition">
-        🔬 PhD & Research Track (CSIR/DBT)
+    <!-- Navigation Tabs: IDP, Research Module, Industry Module -->
+    <div class="flex border-b border-slate-200 overflow-x-auto gap-2">
+      <button id="tabIDP" onclick="switchView('idp')" class="py-3 px-4 font-bold text-sm text-blue-600 border-b-2 border-blue-600 transition whitespace-nowrap">
+        📝 My Individual Development Plan (IDP)
       </button>
-      <button id="industryBtn" onclick="switchTrack('industry')" class="py-3 px-4 font-semibold text-slate-500 hover:text-slate-700 transition">
-        🏭 Biotech Industry Track
+      <button id="tabResearch" onclick="switchView('research')" class="py-3 px-4 font-semibold text-sm text-slate-500 hover:text-slate-800 transition whitespace-nowrap">
+        🔬 Research & Fellowship Module (CSIR/DBT)
+      </button>
+      <button id="tabIndustry" onclick="switchView('industry')" class="py-3 px-4 font-semibold text-sm text-slate-500 hover:text-slate-800 transition whitespace-nowrap">
+        🏭 Biotech Industry & Placement Hub
       </button>
     </div>
 
-    <!-- Dynamic Content Area -->
-    <div id="trackContent" class="grid grid-cols-1 md:grid-cols-2 gap-6">
-      
-      <!-- Card 1: Milestones Checklist -->
-      <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
-        <h3 class="text-lg font-bold mb-4 flex items-center gap-2">
-          <span>📋</span> Active Semester Milestones
-        </h3>
-        <div class="space-y-3" id="milestoneList">
-          <!-- Populated by JavaScript -->
+    <!-- VIEW 1: INDIVIDUAL DEVELOPMENT PLAN (IDP) -->
+    <div id="viewIDP" class="space-y-6">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+          <span class="text-xs font-bold text-slate-400 uppercase">Current Milestone Progress</span>
+          <div class="text-2xl font-black text-slate-900 mt-1" id="idpCompletionPct">60% Complete</div>
+          <div class="w-full bg-slate-100 rounded-full h-2.5 mt-2">
+            <div id="idpProgressBar" class="bg-blue-600 h-2.5 rounded-full" style="width: 60%"></div>
+          </div>
+        </div>
+        <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+          <span class="text-xs font-bold text-slate-400 uppercase">Current Academic Target</span>
+          <div class="text-sm font-bold text-slate-900 mt-2">MSc Semester 3: Mid-Term Dossier</div>
+          <p class="text-xs text-slate-500 mt-1">Due: Final Week of Semester</p>
+        </div>
+        <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+          <span class="text-xs font-bold text-slate-400 uppercase">Assigned Faculty Advisor</span>
+          <div class="text-sm font-bold text-slate-900 mt-2">Dr. Vijay Kumar</div>
+          <p class="text-xs text-slate-500 mt-1">Biomolecular Assays & Neurobiology</p>
         </div>
       </div>
 
-      <!-- Card 2: Practice & Study Module -->
-      <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
-        <h3 class="text-lg font-bold mb-4 flex items-center gap-2">
-          <span id="moduleIcon">📚</span> <span id="moduleTitle">CSIR-NET High-Yield Practice</span>
-        </h3>
-        <div id="moduleContent" class="space-y-4">
-          <!-- Populated by JavaScript -->
+      <!-- IDP Milestone Checklist -->
+      <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm space-y-4">
+        <div class="flex justify-between items-center border-b border-slate-100 pb-3">
+          <h3 class="text-base font-bold text-slate-900">Semester 3 Actionable Milestones</h3>
+          <span class="text-xs bg-blue-50 text-blue-700 font-semibold px-2 py-0.5 rounded">Active Sprint</span>
+        </div>
+        <div class="space-y-3" id="idpMilestoneList">
+          <label class="flex items-center gap-3 p-3 bg-slate-50 rounded-lg border border-slate-200 text-sm cursor-pointer hover:bg-slate-100">
+            <input type="checkbox" onchange="calcIDP()" checked class="w-4 h-4 text-blue-600 rounded" />
+            <span class="line-through text-slate-400">Complete Biosafety Level 2 (BSL-2) handling & sterile hood certification</span>
+          </label>
+          <label class="flex items-center gap-3 p-3 bg-slate-50 rounded-lg border border-slate-200 text-sm cursor-pointer hover:bg-slate-100">
+            <input type="checkbox" onchange="calcIDP()" checked class="w-4 h-4 text-blue-600 rounded" />
+            <span class="line-through text-slate-400">Literature review & 1-page hypothesis draft for dissertation</span>
+          </label>
+          <label class="flex items-center gap-3 p-3 bg-slate-50 rounded-lg border border-slate-200 text-sm cursor-pointer hover:bg-slate-100">
+            <input type="checkbox" onchange="calcIDP()" checked class="w-4 h-4 text-blue-600 rounded" />
+            <span class="line-through text-slate-400">Complete Unit 1 & Unit 13 diagnostic mocks on the portal</span>
+          </label>
+          <label class="flex items-center gap-3 p-3 bg-slate-50 rounded-lg border border-slate-200 text-sm cursor-pointer hover:bg-slate-100">
+            <input type="checkbox" onchange="calcIDP()" class="w-4 h-4 text-blue-600 rounded" />
+            <span class="text-slate-800 font-medium">Verify Analytical HPLC or Western Blot calibration protocol</span>
+          </label>
+          <label class="flex items-center gap-3 p-3 bg-slate-50 rounded-lg border border-slate-200 text-sm cursor-pointer hover:bg-slate-100">
+            <input type="checkbox" onchange="calcIDP()" class="w-4 h-4 text-blue-600 rounded" />
+            <span class="text-slate-800 font-medium">Attend 1:1 Faculty Mentorship session for proposal critique</span>
+          </label>
         </div>
       </div>
-
     </div>
+
+    <!-- VIEW 2: RESEARCH & FELLOWSHIP MODULE -->
+    <div id="viewResearch" class="hidden space-y-6">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <!-- CSIR Practice Drill -->
+        <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm space-y-4">
+          <div class="flex justify-between items-center">
+            <h3 class="font-bold text-slate-900 text-base">CSIR-UGC NET Part-C Problem Drill</h3>
+            <span class="text-xs bg-indigo-50 text-indigo-700 font-bold px-2 py-0.5 rounded">4 Marks</span>
+          </div>
+          <div class="p-4 bg-slate-50 rounded-lg border border-slate-200 space-y-3">
+            <p class="text-xs text-slate-500 font-semibold uppercase">Topic: Unit 13 (Membrane FRAP Kinetics)</p>
+            <p class="text-xs md:text-sm text-slate-800 font-medium leading-relaxed">
+              In a FRAP experiment on receptor protein X, control cells recover 90% fluorescence within 120 sec. Cells treated with Compound W show only 12% recovery over 300 sec. Which inference is most plausible?
+            </p>
+            <div class="space-y-2 text-xs">
+              <label class="flex items-center gap-2 p-2 bg-white rounded border border-slate-200 hover:bg-blue-50 cursor-pointer">
+                <input type="radio" name="res_mock" value="A" />
+                <span><strong>(A)</strong> Compound W anchors receptor X to the cortical cytoskeleton.</span>
+              </label>
+              <label class="flex items-center gap-2 p-2 bg-white rounded border border-slate-200 hover:bg-blue-50 cursor-pointer">
+                <input type="radio" name="res_mock" value="B" />
+                <span><strong>(B)</strong> Compound W dramatically increases lateral lipid bilayer fluidity.</span>
+              </label>
+            </div>
+            <button onclick="checkResearchAnswer()" class="text-xs bg-slate-900 text-white font-semibold py-1.5 px-3 rounded hover:bg-slate-800">
+              Verify Solution
+            </button>
+          </div>
+        </div>
+
+        <!-- Academic Research Skills -->
+        <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm space-y-4">
+          <h3 class="font-bold text-slate-900 text-base">Fellowship & Academic Curriculum Vault</h3>
+          <ul class="space-y-3 text-xs text-slate-700">
+            <li class="p-3 bg-slate-50 rounded-lg border border-slate-200 flex justify-between items-center">
+              <span>📚 <strong>CSIR High-Yield Units:</strong> Unit 1, 2, 3, 4, 8 & 13 Cheat Sheets</span>
+              <span class="text-blue-600 font-semibold cursor-pointer hover:underline">Download PDF</span>
+            </li>
+            <li class="p-3 bg-slate-50 rounded-lg border border-slate-200 flex justify-between items-center">
+              <span>✍️ <strong>PhD Proposal Builder:</strong> Hypothesis, Aims & Methodology Blueprint</span>
+              <span class="text-blue-600 font-semibold cursor-pointer hover:underline">Access Guide</span>
+            </li>
+            <li class="p-3 bg-slate-50 rounded-lg border border-slate-200 flex justify-between items-center">
+              <span>🎯 <strong>PI Mapping:</strong> Target national research institutes (IISc, CSIR labs, IITs)</span>
+              <span class="text-blue-600 font-semibold cursor-pointer hover:underline">View Matrix</span>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- VIEW 3: BIOTECH INDUSTRY & PLACEMENT MODULE -->
+    <div id="viewIndustry" class="hidden space-y-6">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <!-- Industry Standards & SOPs -->
+        <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm space-y-4">
+          <h3 class="font-bold text-slate-900 text-base">Modern Biopharma Competencies</h3>
+          <p class="text-xs text-slate-500">Skills required by top biotech, biomanufacturing, and QC/QA employers.</p>
+          <div class="space-y-2.5 text-xs text-slate-700">
+            <div class="p-3 bg-slate-50 rounded-lg border border-slate-200">
+              <strong class="text-slate-900 block mb-1">📋 cGMP & GLP Regulatory Compliance</strong>
+              Documentation hygiene, batch records, out-of-specification (OOS) procedures, and audit trail discipline.
+            </div>
+            <div class="p-3 bg-slate-50 rounded-lg border border-slate-200">
+              <strong class="text-slate-900 block mb-1">🧪 Analytical Assay Validation</strong>
+              ICH Q2(R1) parameters: Limit of Detection (LOD), Limit of Quantitation (LOQ), linearity, and precision.
+            </div>
+            <div class="p-3 bg-slate-50 rounded-lg border border-slate-200">
+              <strong class="text-slate-900 block mb-1">⚙️ Bioprocess Fundamentals</strong>
+              Upstream bioreactor control (DO, pH, impellers) and downstream ultrafiltration/chromatography purification.
+            </div>
+          </div>
+        </div>
+
+        <!-- Soft Skills & Placement Readiness -->
+        <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm space-y-4">
+          <h3 class="font-bold text-slate-900 text-base">Soft Skills & Placement Accelerator</h3>
+          <ul class="space-y-2.5 text-xs text-slate-700">
+            <li class="p-3 bg-blue-50/70 border border-blue-100 rounded-lg">
+              <span class="font-bold text-blue-900 block">📄 ATS Biotechnology Resume Builder</span>
+              Format protocols as quantitative outcomes (e.g., <em>"Validated assay sensitivity with &lt;5% CV"</em>).
+            </li>
+            <li class="p-3 bg-slate-50 border border-slate-200 rounded-lg">
+              <span class="font-bold text-slate-800 block">✉️ Executive Cold-Email Templates</span>
+              Outreach templates to R&D hiring managers and CRO HR teams for industrial internships.
+            </li>
+            <li class="p-3 bg-slate-50 border border-slate-200 rounded-lg">
+              <span class="font-bold text-slate-800 block">🗣️ Group Discussion & Pitching Drills</span>
+              Topics: <em>Biosimilar regulatory pathways vs Innovator biologics</em>, <em>AI in high-throughput drug screening</em>.
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
   </main>
 
-  <!-- Faculty Booking Modal (Popup) -->
-  <div id="bookingModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
-    <div class="bg-white rounded-xl shadow-lg max-w-md w-full p-6 space-y-4">
-      <div class="flex justify-between items-center">
-        <h3 class="text-lg font-bold text-slate-900">Book Faculty Office Hours</h3>
-        <button onclick="closeModal()" class="text-slate-400 hover:text-slate-600 text-xl font-bold">&times;</button>
-      </div>
+  <!-- SKILL & INTEREST MATCH ASSESSMENT MODAL (Pops up automatically on first visit) -->
+  <div id="assessmentModal" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-2xl w-full p-6 md:p-8 space-y-6 max-h-[90vh] overflow-y-auto border border-slate-200">
       
-      <form onsubmit="handleBooking(event)" class="space-y-3">
+      <div class="border-b border-slate-100 pb-4">
+        <span class="text-xs font-bold text-indigo-600 uppercase tracking-wider">Diagnostic Intake Assessment</span>
+        <h3 class="text-xl font-extrabold text-slate-900 mt-1">Discover Your Biosciences Match</h3>
+        <p class="text-xs text-slate-500 mt-1">Answer these 6 questions across reasoning, research problem-solving, and process execution to calculate your pathway scores.</p>
+      </div>
+
+      <form id="quizForm" onsubmit="calculateScores(event)" class="space-y-5">
+        
+        <!-- Q1: Reasoning & Experimental Design -->
+        <div class="space-y-2">
+          <p class="text-xs font-bold text-slate-800">1. Problem-Solving: If your PCR shows persistent non-specific bands, what is your initial instinct?</p>
+          <div class="space-y-1 text-xs">
+            <label class="flex items-center gap-2 p-2 rounded border border-slate-200 hover:bg-slate-50 cursor-pointer">
+              <input type="radio" name="q1" value="research" required class="text-blue-600" />
+              <span>Formulate a hypothesis testing gradient annealing temperatures and thermodynamic primer affinities.</span>
+            </label>
+            <label class="flex items-center gap-2 p-2 rounded border border-slate-200 hover:bg-slate-50 cursor-pointer">
+              <input type="radio" name="q1" value="industry" class="text-blue-600" />
+              <span>Consult the standard validated SOP, inspect reagent lot numbers, and perform an instrument calibration check.</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Q2: Innovation vs Execution -->
+        <div class="space-y-2">
+          <p class="text-xs font-bold text-slate-800">2. Career Value: Which type of everyday challenge excites you more?</p>
+          <div class="space-y-1 text-xs">
+            <label class="flex items-center gap-2 p-2 rounded border border-slate-200 hover:bg-slate-50 cursor-pointer">
+              <input type="radio" name="q2" value="research" required class="text-blue-600" />
+              <span>Investigating unexplained biological anomalies and publishing new mechanistic discoveries.</span>
+            </label>
+            <label class="flex items-center gap-2 p-2 rounded border border-slate-200 hover:bg-slate-50 cursor-pointer">
+              <input type="radio" name="q2" value="industry" class="text-blue-600" />
+              <span>Scaling up bioprocesses, eliminating production errors, and bringing safe diagnostic products to market.</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Q3: Work Environment & Process -->
+        <div class="space-y-2">
+          <p class="text-xs font-bold text-slate-800">3. Process Style: How do you prefer to approach lab protocols?</p>
+          <div class="space-y-1 text-xs">
+            <label class="flex items-center gap-2 p-2 rounded border border-slate-200 hover:bg-slate-50 cursor-pointer">
+              <input type="radio" name="q3" value="industry" required class="text-blue-600" />
+              <span>Strict adherence to pre-approved checklists, audit logs, and zero-defect documentation.</span>
+            </label>
+            <label class="flex items-center gap-2 p-2 rounded border border-slate-200 hover:bg-slate-50 cursor-pointer">
+              <input type="radio" name="q3" value="research" class="text-blue-600" />
+              <span>Modifying buffer conditions, testing unproven parameters, and iterative troubleshooting.</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Q4: Analytical Aptitude -->
+        <div class="space-y-2">
+          <p class="text-xs font-bold text-slate-800">4. Scientific Literature: When reading a peer-reviewed research paper, what draws your focus?</p>
+          <div class="space-y-1 text-xs">
+            <label class="flex items-center gap-2 p-2 rounded border border-slate-200 hover:bg-slate-50 cursor-pointer">
+              <input type="radio" name="q4" value="research" required class="text-blue-600" />
+              <span>The experimental controls, alternate hypotheses, and what novel questions remain unanswered.</span>
+            </label>
+            <label class="flex items-center gap-2 p-2 rounded border border-slate-200 hover:bg-slate-50 cursor-pointer">
+              <input type="radio" name="q4" value="industry" class="text-blue-600" />
+              <span>The patent potential, commercial scalability, and throughput metrics of the assay.</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Q5: Soft Skills & Team Dynamics -->
+        <div class="space-y-2">
+          <p class="text-xs font-bold text-slate-800">5. Workplace Dynamics: In what team environment do you operate best?</p>
+          <div class="space-y-1 text-xs">
+            <label class="flex items-center gap-2 p-2 rounded border border-slate-200 hover:bg-slate-50 cursor-pointer">
+              <input type="radio" name="q5" value="industry" required class="text-blue-600" />
+              <span>Cross-functional corporate squads with clear KPIs, business deadlines, and client deliverables.</span>
+            </label>
+            <label class="flex items-center gap-2 p-2 rounded border border-slate-200 hover:bg-slate-50 cursor-pointer">
+              <input type="radio" name="q5" value="research" class="text-blue-600" />
+              <span>Independent inquiry within an academic lab with freedom over daily exploration directions.</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Q6: Regulatory vs Exploration -->
+        <div class="space-y-2">
+          <p class="text-xs font-bold text-slate-800">6. Compliance Mindset: How do you feel about regulatory frameworks (FDA, CDSCO, ISO)?</p>
+          <div class="space-y-1 text-xs">
+            <label class="flex items-center gap-2 p-2 rounded border border-slate-200 hover:bg-slate-50 cursor-pointer">
+              <input type="radio" name="q6" value="industry" required class="text-blue-600" />
+              <span>I find regulatory standards interesting and understand they are essential for healthcare safety.</span>
+            </label>
+            <label class="flex items-center gap-2 p-2 rounded border border-slate-200 hover:bg-slate-50 cursor-pointer">
+              <input type="radio" name="q6" value="research" class="text-blue-600" />
+              <span>I prefer fundamental biology and find heavy regulatory paperwork restrictive to creative science.</span>
+            </label>
+          </div>
+        </div>
+
+        <div class="pt-4 border-t border-slate-100 flex justify-end gap-3">
+          <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 rounded-lg text-sm transition shadow-md">
+            Calculate My Pathway Match (/100) &rarr;
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- BOOKING MODAL -->
+  <div id="bookingModal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-xl shadow-xl max-w-md w-full p-6 space-y-4 border border-slate-200">
+      <div class="flex justify-between items-center border-b border-slate-100 pb-2">
+        <h3 class="font-bold text-slate-900 text-base">Book Faculty Office Hours</h3>
+        <button onclick="closeBookingModal()" class="text-slate-400 hover:text-slate-600 text-xl font-bold">&times;</button>
+      </div>
+      <form onsubmit="confirmBooking(event)" class="space-y-3 text-xs">
         <div>
-          <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Select Mentor</label>
-          <select class="w-full border border-slate-300 rounded-lg p-2 text-sm">
-            <option>Dr. V. Kumar (Room 304 - Diagnostics / Protein Biology)</option>
-            <option>Dr. A. Sharma (Room 208 - Bioprocess / Fermentation)</option>
+          <label class="font-bold text-slate-700 block mb-1">Faculty Mentor</label>
+          <select class="w-full border border-slate-300 rounded-lg p-2">
+            <option>Dr. Vijay Kumar (Diagnostics & Protein Research - Room 304)</option>
+            <option>Dr. A. Sharma (Bioprocess & Fermentation - Room 208)</option>
           </select>
         </div>
-
         <div>
-          <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Session Type</label>
-          <select class="w-full border border-slate-300 rounded-lg p-2 text-sm">
-            <option>15-min Question Clarification</option>
-            <option>30-min IDP Milestone Verification</option>
-            <option>30-min Thesis / SOP Guidance</option>
+          <label class="font-bold text-slate-700 block mb-1">Session Type</label>
+          <select class="w-full border border-slate-300 rounded-lg p-2">
+            <option>15-min Doubt Clarification (CSIR/DBT Question)</option>
+            <option>30-min IDP Milestone Sign-off</option>
+            <option>30-min Dissertation Guidance</option>
           </select>
         </div>
-
         <div>
-          <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Doubt / Question Details</label>
-          <textarea required placeholder="Enter Question ID (e.g., #Q-8492) or summary of query..." class="w-full border border-slate-300 rounded-lg p-2 text-sm h-24"></textarea>
+          <label class="font-bold text-slate-700 block mb-1">Linked Query or Question ID</label>
+          <input required type="text" placeholder="e.g., #Q-8492 or SOP-ELISA-01" class="w-full border border-slate-300 rounded-lg p-2" />
         </div>
-
-        <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 rounded-lg text-sm transition">
-          Confirm Appointment
+        <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 rounded-lg text-xs mt-2 transition">
+          Confirm Consultation Slot
         </button>
       </form>
     </div>
   </div>
 
-  <!-- Interactive Logic -->
+  <!-- Footer -->
+  <footer class="bg-white border-t border-slate-200 mt-8 py-4 text-center text-xs text-slate-500">
+    Career-Compass • School of Biosciences & Biotechnology
+  </footer>
+
+  <!-- App Script -->
   <script>
-    const trackData = {
-      phd: {
-        milestones: [
-          "Complete Unit 13 (Methods in Bio) Practice Drills",
-          "Hypothesis & Specific Aims 1-Page Draft",
-          "BSL-2 Aseptic Handling Faculty Sign-off",
-          "Target PhD Labs & PI Mapping"
-        ],
-        title: "CSIR-NET Question of the Week",
-        icon: "🔬",
-        html: `
-          <div class="p-4 bg-slate-50 rounded-lg border border-slate-200">
-            <p class="font-semibold text-sm mb-2 text-slate-900">#Q-8492: FRAP Kinetics & Membrane Mobility</p>
-            <p class="text-xs text-slate-600 mb-3">Compound W prevents 90% fluorescence recovery after bleaching Receptor-X. What does this deduce?</p>
-            <div class="space-y-1 text-xs">
-              <label class="block p-2 bg-white rounded border border-slate-200 hover:bg-blue-50 cursor-pointer">
-                <input type="radio" name="q" /> A) Receptor-X is tethered to the cytoskeleton
-              </label>
-              <label class="block p-2 bg-white rounded border border-slate-200 hover:bg-blue-50 cursor-pointer">
-                <input type="radio" name="q" /> B) Membrane fluidity has dramatically increased
-              </label>
-            </div>
-          </div>
-          <button onclick="alert('Option A is correct: Lack of FRAP recovery indicates molecular immobilization/tethering.')" class="w-full text-xs font-semibold text-blue-600 border border-blue-600 rounded py-2 hover:bg-blue-50">
-            Verify Answer
-          </button>
-        `
-      },
-      industry: {
-        milestones: [
-          "Standard Operating Procedure (SOP) Drafting for ELISA",
-          "Good Laboratory Practice (GLP) Audit Readiness",
-          "ATS-Optimized Biotechnology Resume Draft",
-          "Mock Technical Interview (QC / Bioprocess)"
-        ],
-        title: "Industry Placement & Soft Skills",
-        icon: "🏭",
-        html: `
-          <div class="space-y-3">
-            <div class="p-3 bg-blue-50 rounded-lg text-xs text-blue-900">
-              <strong>Tip:</strong> Translate research into impact. Replace <em>"Did Western blots"</em> with <em>"Validated assay sensitivity with <5% CV"</em>.
-            </div>
-            <ul class="text-xs space-y-2 text-slate-700">
-              <li>📄 <strong>Resume Builder:</strong> Download CDSCO/FDA aligned template.</li>
-              <li>🎤 <strong>Group Discussion:</strong> Biosimilars vs Innovator biologics.</li>
-              <li>💼 <strong>Cold Email:</strong> Template for CRO/CDMO outreach.</li>
-            </ul>
-          </div>
-        `
-      }
-    };
-
-    function renderTrack(trackKey) {
-      const data = trackData[trackKey];
-      
-      // Render Milestones
-      const listEl = document.getElementById("milestoneList");
-      listEl.innerHTML = data.milestones.map(m => `
-        <label class="flex items-center gap-3 p-3 bg-slate-50 rounded-lg border border-slate-200 text-sm cursor-pointer hover:bg-slate-100">
-          <input type="checkbox" class="w-4 h-4 text-blue-600 rounded" />
-          <span>${m}</span>
-        </label>
-      `).join('');
-
-      // Render Module
-      document.getElementById("moduleIcon").textContent = data.icon;
-      document.getElementById("moduleTitle").textContent = data.title;
-      document.getElementById("moduleContent").innerHTML = data.html;
-    }
-
-    function switchTrack(track) {
-      const phdBtn = document.getElementById("phdBtn");
-      const indBtn = document.getElementById("industryBtn");
-      
-      if(track === 'phd') {
-        phdBtn.className = "py-3 px-4 font-semibold text-blue-600 border-b-2 border-blue-600 transition";
-        indBtn.className = "py-3 px-4 font-semibold text-slate-500 hover:text-slate-700 transition";
-      } else {
-        indBtn.className = "py-3 px-4 font-semibold text-blue-600 border-b-2 border-blue-600 transition";
-        phdBtn.className = "py-3 px-4 font-semibold text-slate-500 hover:text-slate-700 transition";
-      }
-      renderTrack(track);
-    }
-
-    function openModal() { document.getElementById("bookingModal").classList.remove("hidden"); }
-    function closeModal() { document.getElementById("bookingModal").classList.add("hidden"); }
-    function handleBooking(e) {
+    function calculateScores(e) {
       e.preventDefault();
-      alert("Consultation request logged! Your mentor has been notified.");
-      closeModal();
+      const form = new FormData(document.getElementById("quizForm"));
+      let resCount = 0;
+      let indCount = 0;
+
+      for (let val of form.values()) {
+        if (val === "research") resCount++;
+        if (val === "industry") indCount++;
+      }
+
+      const total = resCount + indCount;
+      const researchScore = Math.round((resCount / total) * 100);
+      const industryScore = Math.round((indCount / total) * 100);
+
+      document.getElementById("researchScoreDisplay").textContent = `${researchScore}/100`;
+      document.getElementById("industryScoreDisplay").textContent = `${industryScore}/100`;
+
+      document.getElementById("researchScoreBar").style.width = `${researchScore}%`;
+      document.getElementById("industryScoreBar").style.width = `${industryScore}%`;
+
+      const recoEl = document.getElementById("recommendationText");
+      if (researchScore > industryScore) {
+        recoEl.innerHTML = `⭐ <strong>Diagnostic Verdict:</strong> Strong inclination for <strong>Academic Research & PhD Track</strong> (${researchScore}/100). We recommend activating the CSIR/DBT Fellowship coaching module.`;
+        switchView('research');
+      } else {
+        recoEl.innerHTML = `⭐ <strong>Diagnostic Verdict:</strong> Strong inclination for <strong>Biotech Industry & Placement Track</strong> (${industryScore}/100). We recommend focusing on cGMP, assay validation, and placement skills.`;
+        switchView('industry');
+      }
+
+      closeAssessmentModal();
     }
 
-    // Initial render
-    renderTrack('phd');
+    function switchView(viewKey) {
+      const vIDP = document.getElementById("viewIDP");
+      const vRes = document.getElementById("viewResearch");
+      const vInd = document.getElementById("viewIndustry");
+
+      const tIDP = document.getElementById("tabIDP");
+      const tRes = document.getElementById("tabResearch");
+      const tInd = document.getElementById("tabIndustry");
+
+      [vIDP, vRes, vInd].forEach(el => el.classList.add("hidden"));
+      [tIDP, tRes, tInd].forEach(el => el.className = "py-3 px-4 font-semibold text-sm text-slate-500 hover:text-slate-800 transition whitespace-nowrap");
+
+      if (viewKey === 'idp') {
+        vIDP.classList.remove("hidden");
+        tIDP.className = "py-3 px-4 font-bold text-sm text-blue-600 border-b-2 border-blue-600 transition whitespace-nowrap";
+      } else if (viewKey === 'research') {
+        vRes.classList.remove("hidden");
+        tRes.className = "py-3 px-4 font-bold text-sm text-blue-600 border-b-2 border-blue-600 transition whitespace-nowrap";
+      } else if (viewKey === 'industry') {
+        vInd.classList.remove("hidden");
+        tInd.className = "py-3 px-4 font-bold text-sm text-blue-600 border-b-2 border-blue-600 transition whitespace-nowrap";
+      }
+    }
+
+    function calcIDP() {
+      const boxes = document.querySelectorAll("#idpMilestoneList input[type='checkbox']");
+      const checked = Array.from(boxes).filter(b => b.checked).length;
+      const pct = Math.round((checked / boxes.length) * 100);
+      document.getElementById("idpCompletionPct").textContent = `${pct}% Complete`;
+      document.getElementById("idpProgressBar").style.width = `${pct}%`;
+    }
+
+    function checkResearchAnswer() {
+      const selected = document.querySelector('input[name="res_mock"]:checked');
+      if (!selected) return alert("Select an option first.");
+      if (selected.value === "A") {
+        alert("Correct! A lack of FRAP recovery indicates that the receptor is tethered to cytoskeletal or extracellular elements.");
+      } else {
+        alert("Incorrect. Increased fluidity would cause faster recovery, whereas Compound W abolished recovery.");
+      }
+    }
+
+    function openAssessmentModal() { document.getElementById("assessmentModal").classList.remove("hidden"); }
+    function closeAssessmentModal() { document.getElementById("assessmentModal").classList.add("hidden"); }
+    function openBookingModal() { document.getElementById("bookingModal").classList.remove("hidden"); }
+    function closeBookingModal() { document.getElementById("bookingModal").classList.add("hidden"); }
+    function confirmBooking(e) {
+      e.preventDefault();
+      alert("Consultation request logged! Your mentor has received your doubt details.");
+      closeBookingModal();
+    }
   </script>
 </body>
 </html>
